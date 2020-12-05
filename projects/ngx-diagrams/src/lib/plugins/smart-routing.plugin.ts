@@ -1,21 +1,18 @@
 import { DiagramEngine } from '../services/engine.service';
-import * as PF from 'pathfinding';
+import * as Easystar from 'easystarjs';
 
 export const ROUTING_SCALING_FACTOR = 10;
 
 export class PathFinding {
-	private pathFinderInstance:
-		| PF.JPFNeverMoveDiagonally
-		| PF.JPFAlwaysMoveDiagonally
-		| PF.JPFMoveDiagonallyIfNoObstacles
-		| PF.JPFMoveDiagonallyIfAtMostOneObstacle;
+	private pathFinderInstance: Easystar.js;
 
-	constructor(private diagramEngine: DiagramEngine, heuristic = PF.Heuristic.manhattan) {
-		this.pathFinderInstance = new PF.AStarFinder({
-			heuristic,
-			diagonalMovement: PF.DiagonalMovement.Always,
-			weight: 0,
-		});
+	constructor(private diagramEngine: DiagramEngine) {
+		this.pathFinderInstance = new Easystar.js();
+		this.pathFinderInstance.setAcceptableTiles([0]);
+		this.pathFinderInstance.setIterationsPerCalculation(1000);
+		this.pathFinderInstance.enableCornerCutting();
+		this.pathFinderInstance.enableDiagonals();
+		this.pathFinderInstance.enableSync();
 	}
 
 	/**
@@ -31,17 +28,22 @@ export class PathFinding {
 			x: number;
 			y: number;
 		}
-	): number[][] {
-		const matrix = this.diagramEngine.getCanvasMatrix();
-		const grid = new PF.Grid(matrix);
+	): Promise<{ x: number; y: number }[]> {
+		return new Promise((resolve, reject) => {
+			const matrix = this.diagramEngine.getCanvasMatrix();
+			this.pathFinderInstance.setGrid(matrix);
 
-		const fromX = this.diagramEngine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR));
-		const toX = this.diagramEngine.translateRoutingX(Math.floor(to.x / ROUTING_SCALING_FACTOR));
-		const fromY = this.diagramEngine.translateRoutingX(Math.floor(from.y / ROUTING_SCALING_FACTOR));
-		const toY = this.diagramEngine.translateRoutingX(Math.floor(to.y / ROUTING_SCALING_FACTOR));
+			const fromX = this.diagramEngine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR));
+			const toX = this.diagramEngine.translateRoutingX(Math.floor(to.x / ROUTING_SCALING_FACTOR));
+			const fromY = this.diagramEngine.translateRoutingX(Math.floor(from.y / ROUTING_SCALING_FACTOR));
+			const toY = this.diagramEngine.translateRoutingX(Math.floor(to.y / ROUTING_SCALING_FACTOR));
 
-		const path = this.pathFinderInstance.findPath(fromX, fromY, toX, toY, grid);
-		return path;
+			this.pathFinderInstance.findPath(fromX, fromY, toX, toY, path => {
+				resolve(path);
+			});
+
+			this.pathFinderInstance.calculate();
+		});
 	}
 
 	/**
