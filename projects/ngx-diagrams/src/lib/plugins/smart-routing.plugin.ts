@@ -8,10 +8,10 @@ export class PathFinding {
 
 	constructor(private diagramEngine: DiagramEngine) {
 		this.pathFinderInstance = new Easystar.js();
-		this.pathFinderInstance.setAcceptableTiles([0]);
 		this.pathFinderInstance.setIterationsPerCalculation(1000);
-		this.pathFinderInstance.enableCornerCutting();
+		this.pathFinderInstance.setAcceptableTiles(0);
 		this.pathFinderInstance.enableDiagonals();
+		this.pathFinderInstance.enableCornerCutting();
 		this.pathFinderInstance.enableSync();
 	}
 
@@ -19,7 +19,7 @@ export class PathFinding {
 	 * Taking as argument a fully unblocked walking matrix, this method
 	 * finds a direct path from point A to B.
 	 */
-	calculateDirectPath(
+	calculatePath(
 		from: {
 			x: number;
 			y: number;
@@ -30,7 +30,9 @@ export class PathFinding {
 		}
 	): Promise<{ x: number; y: number }[]> {
 		return new Promise((resolve, reject) => {
+			// getting the wrong matrix! need to getRoutingMatrix();
 			const matrix = this.diagramEngine.getCanvasMatrix();
+
 			this.pathFinderInstance.setGrid(matrix);
 
 			const fromX = this.diagramEngine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR));
@@ -44,86 +46,5 @@ export class PathFinding {
 
 			this.pathFinderInstance.calculate();
 		});
-	}
-
-	/**
-	 * Using @link{#calculateDirectPath}'s result as input, we here
-	 * determine the first walkable point found in the matrix that includes
-	 * blocked paths.
-	 */
-	calculateLinkStartEndCoords(
-		matrix: number[][],
-		path: number[][]
-	): {
-		start: {
-			x: number;
-			y: number;
-		};
-		end: {
-			x: number;
-			y: number;
-		};
-		pathToStart: number[][];
-		pathToEnd: number[][];
-	} {
-		const startIndex = path.findIndex(point => matrix[point[1]][point[0]] === 0);
-		const endIndex =
-			path.length -
-			1 -
-			path
-				.slice()
-				.reverse()
-				.findIndex(point => matrix[point[1]][point[0]] === 0);
-
-		// are we trying to create a path exclusively through blocked areas?
-		// if so, let's fallback to the linear routing
-		if (startIndex === -1 || endIndex === -1) {
-			return undefined;
-		}
-
-		const pathToStart = path.slice(0, startIndex);
-		const pathToEnd = path.slice(endIndex);
-
-		return {
-			start: {
-				x: path[startIndex][0],
-				y: path[startIndex][1],
-			},
-			end: {
-				x: path[endIndex][0],
-				y: path[endIndex][1],
-			},
-			pathToStart,
-			pathToEnd,
-		};
-	}
-
-	/**
-	 * Puts everything together: merges the paths from/to the centre of the ports,
-	 * with the path calculated around other elements.
-	 */
-	calculateDynamicPath(
-		routingMatrix: number[][],
-		start: {
-			x: number;
-			y: number;
-		},
-		end: {
-			x: number;
-			y: number;
-		},
-		pathToStart: number[][],
-		pathToEnd: number[][]
-	) {
-		// generate the path based on the matrix with obstacles
-		const grid = new PF.Grid(routingMatrix);
-		const dynamicPath = this.pathFinderInstance.findPath(start.x, start.y, end.x, end.y, grid);
-
-		// aggregate everything to have the calculated path ready for rendering
-		const pathCoords = pathToStart
-			.concat(dynamicPath, pathToEnd)
-			.map(coords => [this.diagramEngine.translateRoutingX(coords[0], true), this.diagramEngine.translateRoutingY(coords[1], true)]);
-
-		return PF.Util.compressPath(pathCoords);
 	}
 }

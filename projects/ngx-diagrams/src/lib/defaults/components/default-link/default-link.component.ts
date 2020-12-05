@@ -43,25 +43,14 @@ export class DefaultLinkComponent extends DefaultLinkModel implements AfterViewI
 		// Observe link coords and update drawing accordingly
 		combineLatest([firstPCoords$, lastPCoords$])
 			.pipe(takeUntil(this.onEntityDestroy()))
-			.subscribe(([firstPCoords, lastPCoords]) => {
+			.subscribe(async ([firstPCoords, lastPCoords]) => {
 				const points = [firstPCoords, lastPCoords];
 
 				if (this.diagramEngine.getSmartRouting()) {
-					// first step: calculate a direct path between the points being linked
-					const directPathCoords = this.pathFinding.calculateDirectPath(firstPCoords, lastPCoords);
-					const routingMatrix = this.diagramEngine.getRoutingMatrix();
+					const path = await this.pathFinding.calculatePath(firstPCoords, lastPCoords);
 
-					// now we need to extract, from the routing matrix, the very first walkable points
-					// so they can be used as origin and destination of the link to be created
-					const smartLink = this.pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);
-
-					if (smartLink) {
-						const { start, end, pathToStart, pathToEnd } = smartLink;
-						// second step: calculate a path avoiding hitting other elements
-						const simplifiedPath = this.pathFinding.calculateDynamicPath(routingMatrix, start, end, pathToStart, pathToEnd);
-						const smartPath = generateDynamicPath(simplifiedPath);
-						this._path$.next(smartPath);
-					}
+					const smartPath = generateDynamicPath(path);
+					this._path$.next(smartPath);
 				} else {
 					// handle regular links
 					// draw the smoothing

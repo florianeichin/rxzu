@@ -63,8 +63,9 @@ export class NgxDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
 	// TODO: handle destruction of container, resseting all observables to avoid memory leaks!
 	ngOnInit() {
 		if (this.diagramModel) {
-			this.diagramModel.getDiagramEngine().setCanvas(this.canvas.nativeElement);
-			this.diagramModel.getDiagramEngine().setSmartRoutingStatus(this.smartRouting);
+			const diagramEngine = this.diagramModel.getDiagramEngine();
+			diagramEngine.setCanvas(this.canvas.nativeElement);
+			diagramEngine.setSmartRoutingStatus(this.smartRouting);
 
 			this.nodes$ = this.diagramModel.selectNodes();
 			this.links$ = this.diagramModel.selectLinks();
@@ -77,12 +78,16 @@ export class NgxDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
 				this.nodesRendered$.next(false);
 				Object.values(nodes).forEach(node => {
 					if (!node.getPainted()) {
-						this.diagramModel.getDiagramEngine().generateWidgetForNode(node, this.nodesLayer);
+						diagramEngine.generateWidgetForNode(node, this.nodesLayer);
 						this.cdRef.detectChanges();
 					}
 				});
 
 				this.nodesRendered$.next(true);
+
+				if (diagramEngine.getSmartRouting()) {
+					diagramEngine.getRoutingMatrix();
+				}
 			});
 		}
 	}
@@ -101,23 +106,24 @@ export class NgxDiagramComponent implements OnInit, AfterViewInit, OnDestroy {
 			.subscribe(([_, links]) => {
 				Object.values(links).forEach(link => {
 					if (!link.getPainted() && link.getSourcePort().getPainted()) {
+						const diagramEngine = this.diagramModel.getDiagramEngine();
 						if (link.getSourcePort() !== null) {
-							const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getSourcePort());
+							const portCenter = diagramEngine.getPortCenter(link.getSourcePort());
 							link.getPoints()[0].setCoords(portCenter);
 
-							const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getSourcePort());
+							const portCoords = diagramEngine.getPortCoords(link.getSourcePort());
 							link.getSourcePort().updateCoords(portCoords);
 						}
 
 						if (link.getTargetPort() !== null) {
-							const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getTargetPort());
+							const portCenter = diagramEngine.getPortCenter(link.getTargetPort());
 							link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
 
-							const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getTargetPort());
+							const portCoords = diagramEngine.getPortCoords(link.getTargetPort());
 							link.getTargetPort().updateCoords(portCoords);
 						}
 
-						this.diagramModel.getDiagramEngine().generateWidgetForLink(link, this.linksLayer);
+						diagramEngine.generateWidgetForLink(link, this.linksLayer);
 						this.cdRef.detectChanges();
 					}
 				});

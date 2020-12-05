@@ -22365,10 +22365,10 @@
         },
         {
             "name": "PathFinding",
-            "id": "class-PathFinding-96ea829e21c85d94b38514193e49653b",
+            "id": "class-PathFinding-d957c48d796da3c3d1b4f9ca9cd5f5cd",
             "file": "projects/ngx-diagrams/src/lib/plugins/smart-routing.plugin.ts",
             "type": "class",
-            "sourceCode": "import { DiagramEngine } from '../services/engine.service';\nimport * as PF from 'pathfinding';\n\nexport const ROUTING_SCALING_FACTOR = 10;\n\nexport class PathFinding {\n\tprivate pathFinderInstance:\n\t\t| PF.JPFNeverMoveDiagonally\n\t\t| PF.JPFAlwaysMoveDiagonally\n\t\t| PF.JPFMoveDiagonallyIfNoObstacles\n\t\t| PF.JPFMoveDiagonallyIfAtMostOneObstacle;\n\n\tconstructor(private diagramEngine: DiagramEngine, heuristic = PF.Heuristic.manhattan) {\n\t\tthis.pathFinderInstance = new PF.AStarFinder({\n\t\t\theuristic,\n\t\t\tdiagonalMovement: PF.DiagonalMovement.Always,\n\t\t\tweight: 0,\n\t\t});\n\t}\n\n\t/**\n\t * Taking as argument a fully unblocked walking matrix, this method\n\t * finds a direct path from point A to B.\n\t */\n\tcalculateDirectPath(\n\t\tfrom: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t},\n\t\tto: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t}\n\t): number[][] {\n\t\tconst matrix = this.diagramEngine.getCanvasMatrix();\n\t\tconst grid = new PF.Grid(matrix);\n\n\t\tconst fromX = this.diagramEngine.translateRoutingX(Math.floor(from.x / ROUTING_SCALING_FACTOR));\n\t\tconst toX = this.diagramEngine.translateRoutingX(Math.floor(to.x / ROUTING_SCALING_FACTOR));\n\t\tconst fromY = this.diagramEngine.translateRoutingX(Math.floor(from.y / ROUTING_SCALING_FACTOR));\n\t\tconst toY = this.diagramEngine.translateRoutingX(Math.floor(to.y / ROUTING_SCALING_FACTOR));\n\n\t\tconst path = this.pathFinderInstance.findPath(fromX, fromY, toX, toY, grid);\n\t\treturn path;\n\t}\n\n\t/**\n\t * Using @link{#calculateDirectPath}'s result as input, we here\n\t * determine the first walkable point found in the matrix that includes\n\t * blocked paths.\n\t */\n\tcalculateLinkStartEndCoords(\n\t\tmatrix: number[][],\n\t\tpath: number[][]\n\t): {\n\t\tstart: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t};\n\t\tend: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t};\n\t\tpathToStart: number[][];\n\t\tpathToEnd: number[][];\n\t} {\n\t\tconst startIndex = path.findIndex(point => matrix[point[1]][point[0]] === 0);\n\t\tconst endIndex =\n\t\t\tpath.length -\n\t\t\t1 -\n\t\t\tpath\n\t\t\t\t.slice()\n\t\t\t\t.reverse()\n\t\t\t\t.findIndex(point => matrix[point[1]][point[0]] === 0);\n\n\t\t// are we trying to create a path exclusively through blocked areas?\n\t\t// if so, let's fallback to the linear routing\n\t\tif (startIndex === -1 || endIndex === -1) {\n\t\t\treturn undefined;\n\t\t}\n\n\t\tconst pathToStart = path.slice(0, startIndex);\n\t\tconst pathToEnd = path.slice(endIndex);\n\n\t\treturn {\n\t\t\tstart: {\n\t\t\t\tx: path[startIndex][0],\n\t\t\t\ty: path[startIndex][1],\n\t\t\t},\n\t\t\tend: {\n\t\t\t\tx: path[endIndex][0],\n\t\t\t\ty: path[endIndex][1],\n\t\t\t},\n\t\t\tpathToStart,\n\t\t\tpathToEnd,\n\t\t};\n\t}\n\n\t/**\n\t * Puts everything together: merges the paths from/to the centre of the ports,\n\t * with the path calculated around other elements.\n\t */\n\tcalculateDynamicPath(\n\t\troutingMatrix: number[][],\n\t\tstart: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t},\n\t\tend: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t},\n\t\tpathToStart: number[][],\n\t\tpathToEnd: number[][]\n\t) {\n\t\t// generate the path based on the matrix with obstacles\n\t\tconst grid = new PF.Grid(routingMatrix);\n\t\tconst dynamicPath = this.pathFinderInstance.findPath(start.x, start.y, end.x, end.y, grid);\n\n\t\t// aggregate everything to have the calculated path ready for rendering\n\t\tconst pathCoords = pathToStart\n\t\t\t.concat(dynamicPath, pathToEnd)\n\t\t\t.map(coords => [this.diagramEngine.translateRoutingX(coords[0], true), this.diagramEngine.translateRoutingY(coords[1], true)]);\n\n\t\treturn PF.Util.compressPath(pathCoords);\n\t}\n}\n",
+            "sourceCode": "import { DiagramEngine } from '../services/engine.service';\nimport * as Easystar from 'easystarjs';\nexport const ROUTING_SCALING_FACTOR = 10;\nexport class PathFinding {\n\tprivate pathFinderInstance: Easystar.js;\n\n\tconstructor(private diagramEngine: DiagramEngine) {\n\t\tthis.pathFinderInstance = new Easystar.js();\n\t\tthis.pathFinderInstance.setAcceptableTiles(0);\n\t\tthis.pathFinderInstance.setIterationsPerCalculation(1000);\n\t\tthis.pathFinderInstance.enableCornerCutting();\n\t\tthis.pathFinderInstance.enableDiagonals();\n\t\tthis.pathFinderInstance.enableSync();\n\t}\n\n\t/**\n\t * Taking as argument a fully unblocked walking matrix, this method\n\t * finds a direct path from point A to B.\n\t */\n\tcalculatePath(\n\t\tfrom: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t},\n\t\tto: {\n\t\t\tx: number;\n\t\t\ty: number;\n\t\t}\n\t): Promise<{ x: number; y: number }[]> {\n\t\treturn new Promise((resolve, reject) => {\n\t\t\tconst matrix = this.diagramEngine.getCanvasMatrix();\n\t\t\tconsole.table(matrix);\n\t\t\tthis.pathFinderInstance.setGrid(matrix);\n\n\t\t\tconst fromX = this.diagramEngine.translateRoutingX(from.x);\n\t\t\tconst toX = this.diagramEngine.translateRoutingX(to.x);\n\t\t\tconst fromY = this.diagramEngine.translateRoutingX(from.y);\n\t\t\tconst toY = this.diagramEngine.translateRoutingX(to.y);\n\t\t\tthis.pathFinderInstance.findPath(fromX, fromY, toX, toY, path => {\n\t\t\t\tresolve(path);\n\t\t\t});\n\n\t\t\tthis.pathFinderInstance.calculate();\n\t\t});\n\t}\n}\n",
             "constructorObj": {
                 "name": "constructor",
                 "description": "",
@@ -22376,26 +22376,13 @@
                     {
                         "name": "diagramEngine",
                         "type": "DiagramEngine"
-                    },
-                    {
-                        "name": "heuristic",
-                        "type": "",
-                        "defaultValue": "PF.Heuristic.manhattan"
                     }
                 ],
-                "line": 11,
+                "line": 5,
                 "jsdoctags": [
                     {
                         "name": "diagramEngine",
                         "type": "DiagramEngine",
-                        "tagName": {
-                            "text": "param"
-                        }
-                    },
-                    {
-                        "name": "heuristic",
-                        "type": "",
-                        "defaultValue": "PF.Heuristic.manhattan",
                         "tagName": {
                             "text": "param"
                         }
@@ -22405,10 +22392,10 @@
             "properties": [
                 {
                     "name": "pathFinderInstance",
-                    "type": "PF.JPFNeverMoveDiagonally | PF.JPFAlwaysMoveDiagonally | PF.JPFMoveDiagonallyIfNoObstacles | PF.JPFMoveDiagonallyIfAtMostOneObstacle",
+                    "type": "Easystar.js",
                     "optional": false,
                     "description": "",
-                    "line": 7,
+                    "line": 5,
                     "modifierKind": [
                         112
                     ]
@@ -22416,7 +22403,7 @@
             ],
             "methods": [
                 {
-                    "name": "calculateDirectPath",
+                    "name": "calculatePath",
                     "args": [
                         {
                             "name": "from",
@@ -22428,9 +22415,9 @@
                         }
                     ],
                     "optional": false,
-                    "returnType": "[][]",
+                    "returnType": "Promise<literal type[]>",
                     "typeParameters": [],
-                    "line": 25,
+                    "line": 20,
                     "description": "<p>Taking as argument a fully unblocked walking matrix, this method\nfinds a direct path from point A to B.</p>\n",
                     "jsdoctags": [
                         {
@@ -22443,107 +22430,6 @@
                         {
                             "name": "to",
                             "type": "literal type",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "calculateDynamicPath",
-                    "args": [
-                        {
-                            "name": "routingMatrix",
-                            "type": "number[][]"
-                        },
-                        {
-                            "name": "start",
-                            "type": "literal type"
-                        },
-                        {
-                            "name": "end",
-                            "type": "literal type"
-                        },
-                        {
-                            "name": "pathToStart",
-                            "type": "number[][]"
-                        },
-                        {
-                            "name": "pathToEnd",
-                            "type": "number[][]"
-                        }
-                    ],
-                    "optional": false,
-                    "returnType": "any",
-                    "typeParameters": [],
-                    "line": 103,
-                    "description": "<p>Puts everything together: merges the paths from/to the centre of the ports,\nwith the path calculated around other elements.</p>\n",
-                    "jsdoctags": [
-                        {
-                            "name": "routingMatrix",
-                            "type": "number[][]",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        },
-                        {
-                            "name": "start",
-                            "type": "literal type",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        },
-                        {
-                            "name": "end",
-                            "type": "literal type",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        },
-                        {
-                            "name": "pathToStart",
-                            "type": "number[][]",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        },
-                        {
-                            "name": "pathToEnd",
-                            "type": "number[][]",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        }
-                    ]
-                },
-                {
-                    "name": "calculateLinkStartEndCoords",
-                    "args": [
-                        {
-                            "name": "matrix",
-                            "type": "number[][]"
-                        },
-                        {
-                            "name": "path",
-                            "type": "number[][]"
-                        }
-                    ],
-                    "optional": false,
-                    "returnType": "literal type",
-                    "typeParameters": [],
-                    "line": 52,
-                    "description": "<p>Using @link{#calculateDirectPath}&#39;s result as input, we here\ndetermine the first walkable point found in the matrix that includes\nblocked paths.</p>\n",
-                    "jsdoctags": [
-                        {
-                            "name": "matrix",
-                            "type": "number[][]",
-                            "tagName": {
-                                "text": "param"
-                            }
-                        },
-                        {
-                            "name": "path",
-                            "type": "number[][]",
                             "tagName": {
                                 "text": "param"
                             }
@@ -26739,7 +26625,7 @@
         },
         {
             "name": "DefaultLinkComponent",
-            "id": "component-DefaultLinkComponent-3f945db5fb1f194c3c08da6478638a17",
+            "id": "component-DefaultLinkComponent-c111f632094eae049c922a953762e0ba",
             "file": "projects/ngx-diagrams/src/lib/defaults/components/default-link/default-link.component.ts",
             "encapsulation": [],
             "entryComponents": [],
@@ -27215,7 +27101,7 @@
                     "optional": false,
                     "returnType": "Coords",
                     "typeParameters": [],
-                    "line": 121,
+                    "line": 110,
                     "jsdoctags": [
                         {
                             "name": "firstPoint",
@@ -27248,7 +27134,7 @@
                     "optional": false,
                     "returnType": "number",
                     "typeParameters": [],
-                    "line": 104,
+                    "line": 93,
                     "jsdoctags": [
                         {
                             "name": "firstPoint",
@@ -28565,7 +28451,7 @@
             "description": "",
             "rawdescription": "",
             "type": "component",
-            "sourceCode": "import { Component, AfterViewInit, ChangeDetectorRef, ViewChild, ViewContainerRef, OnInit } from '@angular/core';\nimport { DefaultLinkModel } from '../../models/default-link.model';\nimport { generateCurvePath, generateDynamicPath } from '../../../utils/tool-kit.util';\nimport { combineLatest, BehaviorSubject, Observable } from 'rxjs';\nimport { PointModel } from '../../../models/point.model';\nimport { LabelModel } from '../../../models/label.model';\nimport { filter, takeUntil } from 'rxjs/operators';\nimport { Coords } from '../../../interfaces';\nimport { PathFinding } from '../../../plugins/smart-routing.plugin';\n\n@Component({\n\tselector: 'ngdx-default-link',\n\ttemplateUrl: './default-link.component.html',\n\tstyleUrls: ['./default-link.component.scss'],\n})\nexport class DefaultLinkComponent extends DefaultLinkModel implements AfterViewInit, OnInit {\n\t@ViewChild('labelLayer', { read: ViewContainerRef, static: true }) labelLayer: ViewContainerRef;\n\n\t_path$: BehaviorSubject<string> = new BehaviorSubject(null);\n\tpath$: Observable<string> = this._path$.pipe(this.entityPipe('path'));\n\tpoints$: BehaviorSubject<PointModel[]> = new BehaviorSubject([]);\n\tlabel$: Observable<LabelModel>;\n\tpathFinding: PathFinding; // only set when smart routing is active\n\n\tconstructor(private cdRef: ChangeDetectorRef) {\n\t\tsuper({ type: 'ngdx-default-link' });\n\t}\n\n\ttrackByPoints(i: number, point: PointModel) {\n\t\treturn point.id;\n\t}\n\n\tngOnInit() {\n\t\tif (this.diagramEngine.getSmartRouting()) {\n\t\t\tthis.pathFinding = this.diagramEngine.getPathfinding();\n\t\t}\n\t}\n\n\tngAfterViewInit() {\n\t\tconst firstPCoords$ = this.getFirstPoint().selectCoords();\n\t\tconst lastPCoords$ = this.getLastPoint().selectCoords();\n\n\t\t// Observe link coords and update drawing accordingly\n\t\tcombineLatest([firstPCoords$, lastPCoords$])\n\t\t\t.pipe(takeUntil(this.onEntityDestroy()))\n\t\t\t.subscribe(([firstPCoords, lastPCoords]) => {\n\t\t\t\tconst points = [firstPCoords, lastPCoords];\n\n\t\t\t\tif (this.diagramEngine.getSmartRouting()) {\n\t\t\t\t\t// first step: calculate a direct path between the points being linked\n\t\t\t\t\tconst directPathCoords = this.pathFinding.calculateDirectPath(firstPCoords, lastPCoords);\n\t\t\t\t\tconst routingMatrix = this.diagramEngine.getRoutingMatrix();\n\n\t\t\t\t\t// now we need to extract, from the routing matrix, the very first walkable points\n\t\t\t\t\t// so they can be used as origin and destination of the link to be created\n\t\t\t\t\tconst smartLink = this.pathFinding.calculateLinkStartEndCoords(routingMatrix, directPathCoords);\n\n\t\t\t\t\tif (smartLink) {\n\t\t\t\t\t\tconst { start, end, pathToStart, pathToEnd } = smartLink;\n\t\t\t\t\t\t// second step: calculate a path avoiding hitting other elements\n\t\t\t\t\t\tconst simplifiedPath = this.pathFinding.calculateDynamicPath(routingMatrix, start, end, pathToStart, pathToEnd);\n\t\t\t\t\t\tconst smartPath = generateDynamicPath(simplifiedPath);\n\t\t\t\t\t\tthis._path$.next(smartPath);\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\t// handle regular links\n\t\t\t\t\t// draw the smoothing\n\t\t\t\t\t// if the points are too close, just draw a straight line\n\t\t\t\t\tconst isHorizontal = Math.abs(firstPCoords.x - lastPCoords.x) > Math.abs(firstPCoords.y - lastPCoords.y);\n\t\t\t\t\tconst xOrY = isHorizontal ? 'x' : 'y';\n\t\t\t\t\tlet isStraight = false;\n\t\t\t\t\tif (Math.abs(points[0][xOrY] - points[1][xOrY]) < 50) {\n\t\t\t\t\t\tisStraight = true;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst path = generateCurvePath(firstPCoords, lastPCoords, isStraight ? 0 : this.curvyness);\n\t\t\t\t\tthis._path$.next(path);\n\t\t\t\t}\n\n\t\t\t\tconst label = this.getLabel();\n\t\t\t\t// update label position\n\t\t\t\tif (label) {\n\t\t\t\t\tlabel.setCoords(this.calcCenterOfPath(firstPCoords, lastPCoords));\n\n\t\t\t\t\t// TODO: check whether we want the label to rotate along with the line\n\t\t\t\t\t// label.setRotation(this.calcLabelIncline(firstPCoords, lastPCoords));\n\t\t\t\t}\n\n\t\t\t\t// TODO: handle the multiple lines in between the points\n\t\t\t\t// https://github.com/projectstorm/react-diagrams/blob/master/src/defaults/widgets/DefaultLinkWidget.tsx#L344-L371\n\n\t\t\t\tthis.cdRef.detectChanges();\n\t\t\t});\n\n\t\t// observe link label and draw/remove accordingly\n\t\tthis.selectLabel()\n\t\t\t.pipe(filter(Boolean))\n\t\t\t.subscribe((label: LabelModel) => {\n\t\t\t\tthis.diagramEngine.generateWidgetForLabel(label, this.labelLayer);\n\t\t\t\tthis.cdRef.detectChanges();\n\t\t\t});\n\t}\n\n\tcalcLabelIncline(firstPoint: Coords, secondPoint: Coords): number {\n\t\tconst dy = secondPoint.y - firstPoint.y;\n\t\tconst dx = secondPoint.x - firstPoint.x;\n\n\t\tif (dx === 0) {\n\t\t\treturn 0;\n\t\t}\n\n\t\tlet inclineAngel = (Math.atan(dy / dx) * 180) / Math.PI;\n\n\t\tif (inclineAngel < 0) {\n\t\t\tinclineAngel += 180;\n\t\t}\n\n\t\treturn inclineAngel;\n\t}\n\n\tcalcCenterOfPath(firstPoint: Coords, secondPoint: Coords): Coords {\n\t\treturn { x: (firstPoint.x + secondPoint.x) / 2 + 20, y: (firstPoint.y + secondPoint.y) / 2 + 20 };\n\t}\n}\n",
+            "sourceCode": "import { Component, AfterViewInit, ChangeDetectorRef, ViewChild, ViewContainerRef, OnInit } from '@angular/core';\nimport { DefaultLinkModel } from '../../models/default-link.model';\nimport { generateCurvePath, generateDynamicPath } from '../../../utils/tool-kit.util';\nimport { combineLatest, BehaviorSubject, Observable } from 'rxjs';\nimport { PointModel } from '../../../models/point.model';\nimport { LabelModel } from '../../../models/label.model';\nimport { filter, takeUntil } from 'rxjs/operators';\nimport { Coords } from '../../../interfaces';\nimport { PathFinding } from '../../../plugins/smart-routing.plugin';\n\n@Component({\n\tselector: 'ngdx-default-link',\n\ttemplateUrl: './default-link.component.html',\n\tstyleUrls: ['./default-link.component.scss'],\n})\nexport class DefaultLinkComponent extends DefaultLinkModel implements AfterViewInit, OnInit {\n\t@ViewChild('labelLayer', { read: ViewContainerRef, static: true }) labelLayer: ViewContainerRef;\n\n\t_path$: BehaviorSubject<string> = new BehaviorSubject(null);\n\tpath$: Observable<string> = this._path$.pipe(this.entityPipe('path'));\n\tpoints$: BehaviorSubject<PointModel[]> = new BehaviorSubject([]);\n\tlabel$: Observable<LabelModel>;\n\tpathFinding: PathFinding; // only set when smart routing is active\n\n\tconstructor(private cdRef: ChangeDetectorRef) {\n\t\tsuper({ type: 'ngdx-default-link' });\n\t}\n\n\ttrackByPoints(i: number, point: PointModel) {\n\t\treturn point.id;\n\t}\n\n\tngOnInit() {\n\t\tif (this.diagramEngine.getSmartRouting()) {\n\t\t\tthis.pathFinding = this.diagramEngine.getPathfinding();\n\t\t}\n\t}\n\n\tngAfterViewInit() {\n\t\tconst firstPCoords$ = this.getFirstPoint().selectCoords();\n\t\tconst lastPCoords$ = this.getLastPoint().selectCoords();\n\n\t\t// Observe link coords and update drawing accordingly\n\t\tcombineLatest([firstPCoords$, lastPCoords$])\n\t\t\t.pipe(takeUntil(this.onEntityDestroy()))\n\t\t\t.subscribe(async ([firstPCoords, lastPCoords]) => {\n\t\t\t\tconst points = [firstPCoords, lastPCoords];\n\n\t\t\t\tif (this.diagramEngine.getSmartRouting()) {\n\t\t\t\t\t// second step: calculate a path avoiding hitting other elements\n\t\t\t\t\tconst path = await this.pathFinding.calculatePath(firstPCoords, lastPCoords);\n\t\t\t\t\tconst smartPath = generateDynamicPath(path);\n\t\t\t\t\tthis._path$.next(smartPath);\n\t\t\t\t} else {\n\t\t\t\t\t// handle regular links\n\t\t\t\t\t// draw the smoothing\n\t\t\t\t\t// if the points are too close, just draw a straight line\n\t\t\t\t\tconst isHorizontal = Math.abs(firstPCoords.x - lastPCoords.x) > Math.abs(firstPCoords.y - lastPCoords.y);\n\t\t\t\t\tconst xOrY = isHorizontal ? 'x' : 'y';\n\t\t\t\t\tlet isStraight = false;\n\t\t\t\t\tif (Math.abs(points[0][xOrY] - points[1][xOrY]) < 50) {\n\t\t\t\t\t\tisStraight = true;\n\t\t\t\t\t}\n\n\t\t\t\t\tconst path = generateCurvePath(firstPCoords, lastPCoords, isStraight ? 0 : this.curvyness);\n\t\t\t\t\tthis._path$.next(path);\n\t\t\t\t}\n\n\t\t\t\tconst label = this.getLabel();\n\t\t\t\t// update label position\n\t\t\t\tif (label) {\n\t\t\t\t\tlabel.setCoords(this.calcCenterOfPath(firstPCoords, lastPCoords));\n\n\t\t\t\t\t// TODO: check whether we want the label to rotate along with the line\n\t\t\t\t\t// label.setRotation(this.calcLabelIncline(firstPCoords, lastPCoords));\n\t\t\t\t}\n\n\t\t\t\t// TODO: handle the multiple lines in between the points\n\t\t\t\t// https://github.com/projectstorm/react-diagrams/blob/master/src/defaults/widgets/DefaultLinkWidget.tsx#L344-L371\n\n\t\t\t\tthis.cdRef.detectChanges();\n\t\t\t});\n\n\t\t// observe link label and draw/remove accordingly\n\t\tthis.selectLabel()\n\t\t\t.pipe(filter(Boolean))\n\t\t\t.subscribe((label: LabelModel) => {\n\t\t\t\tthis.diagramEngine.generateWidgetForLabel(label, this.labelLayer);\n\t\t\t\tthis.cdRef.detectChanges();\n\t\t\t});\n\t}\n\n\tcalcLabelIncline(firstPoint: Coords, secondPoint: Coords): number {\n\t\tconst dy = secondPoint.y - firstPoint.y;\n\t\tconst dx = secondPoint.x - firstPoint.x;\n\n\t\tif (dx === 0) {\n\t\t\treturn 0;\n\t\t}\n\n\t\tlet inclineAngel = (Math.atan(dy / dx) * 180) / Math.PI;\n\n\t\tif (inclineAngel < 0) {\n\t\t\tinclineAngel += 180;\n\t\t}\n\n\t\treturn inclineAngel;\n\t}\n\n\tcalcCenterOfPath(firstPoint: Coords, secondPoint: Coords): Coords {\n\t\treturn { x: (firstPoint.x + secondPoint.x) / 2 + 20, y: (firstPoint.y + secondPoint.y) / 2 + 20 };\n\t}\n}\n",
             "assetsDirs": [],
             "styleUrlsData": [
                 {
@@ -33784,9 +33670,9 @@
                 "type": "class",
                 "linktype": "classe",
                 "name": "PathFinding",
-                "coveragePercent": 50,
-                "coverageCount": "3/6",
-                "status": "medium"
+                "coveragePercent": 25,
+                "coverageCount": "1/4",
+                "status": "low"
             },
             {
                 "filePath": "projects/ngx-diagrams/src/lib/plugins/smart-routing.plugin.ts",
