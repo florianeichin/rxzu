@@ -1,3 +1,11 @@
+## [3.3.4](https://github.com/Vonage/ngx-diagrams/compare/v3.3.3...v3.3.4) (2020-12-16)
+
+
+### Performance Improvements
+
+* **components:** set change detection to OnPush to reduce cd cycles ([80d2339](https://github.com/Vonage/ngx-diagrams/commit/80d23399b8bf9c9615673ce7b021c346bc6e86ba))
+* **diagram:** run dom changes outside of zone ([0d5fd04](https://github.com/Vonage/ngx-diagrams/commit/0d5fd04144ece14accc5dd229bde3c179a044481))
+
 ## [3.3.3](https://github.com/DanielNetzer/ngx-diagrams/compare/v3.3.2...v3.3.3) (2020-12-11)
 
 ### Performance Improvements
