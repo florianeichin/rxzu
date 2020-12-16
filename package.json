@@ -1,6 +1,6 @@
 {
   "name": "ngx-diagrams",
-  "version": "3.3.2",
+  "version": "3.3.4",
   "author": "Daniel Netzer",
   "engines": {
     "npm": "please-use-yarn",
