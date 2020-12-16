@@ -1,9 +1,10 @@
 {
   "name": "ngx-diagrams",
   "version": "3.3.2",
-  "author": {
-    "email": "daniel.netzer7@gmail.com",
-    "name": "Daniel Netzer"
+  "author": "Daniel Netzer",
+  "engines": {
+    "npm": "please-use-yarn",
+    "yarn": ">= 1.21.1"
   },
   "license": "MIT",
   "scripts": {

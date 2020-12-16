@@ -7,6 +7,7 @@ on:
 
 jobs:
   dependencies:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     name: Cache dependencies
     runs-on: ubuntu-latest
     steps:
@@ -26,6 +27,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
   build:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     needs: [dependencies]
     name: Build storybook & library
     runs-on: ubuntu-latest
@@ -50,6 +52,7 @@ jobs:
           retention-days: 5
 
   publish_docs:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     needs: [build]
     name: Publish storybook
     runs-on: ubuntu-latest
@@ -64,6 +67,7 @@ jobs:
           publish_dir: ./dist/storybook/ngx-diagrams
 
   publish_lib:
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     needs: [build]
     name: Publish ngx-diagrams
     runs-on: ubuntu-latest

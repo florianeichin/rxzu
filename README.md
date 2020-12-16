@@ -19,5 +19,5 @@ NGX-Diagrams is a diagrams engine system, built on top of Angular and RxJS, whic
 
 NGX-Digrams encourages creativity. It allows you to create any node, link, label, or even a custom entity and provide powerful tools with a moderate learning curve, suitable for both experienced and inexperienced developers alike.
 
-- 🤓 Learn about it on our [Storybook](https://danielnetzer.github.io/ngx-diagrams)
+- 🤓 Learn about it on our [Storybook](https://vonage.github.io/ngx-diagrams)
 - 🍄 Join NGX-Diagrams [Gitter](https://gitter.im/ngx-diagrams/community) room
