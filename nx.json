@@ -22,12 +22,16 @@
     }
   },
   "projects": {
-    "ngx-diagrams": {
-      "tags": []
-    },
-    "ngx-diagrams-e2e": {
+    "ngx-diagrams-angular-e2e": {
       "tags": [],
-      "implicitDependencies": ["ngx-diagrams"]
+      "implicitDependencies": ["core", "angular"]
+    },
+    "angular": {
+      "tags": [],
+      "implicitDependencies": ["core"]
+    },
+    "core": {
+      "tags": []
     }
   }
 }

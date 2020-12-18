@@ -1,39 +1,36 @@
 {
   "version": 1,
   "projects": {
-    "ngx-diagrams": {
+    "angular": {
       "projectType": "library",
-      "root": "libs/ngx-diagrams",
-      "sourceRoot": "libs/ngx-diagrams/src",
+      "root": "libs/angular",
+      "sourceRoot": "libs/angular/src",
       "prefix": "ngx-diagrams",
       "architect": {
         "lint": {
           "builder": "@nrwl/linter:lint",
           "options": {
-            "tsConfig": [
-              "libs/ngx-diagrams/tsconfig.lib.json",
-              "libs/ngx-diagrams/tsconfig.spec.json"
-            ],
-            "exclude": ["**/node_modules/**", "!libs/ngx-diagrams/**/*"]
+            "tsConfig": ["libs/angular/tsconfig.lib.json", "libs/angular/tsconfig.spec.json"],
+            "exclude": ["**/node_modules/**", "!libs/angular/**/*"]
           }
         },
         "test": {
           "builder": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/ngx-diagrams"],
+          "outputs": ["coverage/libs/angular"],
           "options": {
-            "jestConfig": "libs/ngx-diagrams/jest.config.js",
+            "jestConfig": "libs/angular/jest.config.js",
             "passWithNoTests": true
           }
         },
         "build": {
           "builder": "@angular-devkit/build-angular:ng-packagr",
           "options": {
-            "tsConfig": "libs/ngx-diagrams/tsconfig.lib.json",
-            "project": "libs/ngx-diagrams/ng-package.json"
+            "tsConfig": "libs/angular/tsconfig.lib.json",
+            "project": "libs/angular/ng-package.json"
           },
           "configurations": {
             "production": {
-              "tsConfig": "libs/ngx-diagrams/tsconfig.lib.prod.json"
+              "tsConfig": "libs/angular/tsconfig.lib.prod.json"
             }
           }
         },
@@ -43,7 +40,7 @@
             "uiFramework": "@storybook/angular",
             "port": 4400,
             "config": {
-              "configFolder": "libs/ngx-diagrams/.storybook"
+              "configFolder": "libs/angular/.storybook"
             }
           },
           "configurations": {
@@ -56,9 +53,9 @@
           "builder": "@nrwl/storybook:build",
           "options": {
             "uiFramework": "@storybook/angular",
-            "outputPath": "dist/storybook/ngx-diagrams",
+            "outputPath": "dist/storybook/angular",
             "config": {
-              "configFolder": "libs/ngx-diagrams/.storybook"
+              "configFolder": "libs/angular/.storybook"
             }
           },
           "configurations": {
@@ -69,16 +66,16 @@
         }
       }
     },
-    "ngx-diagrams-e2e": {
-      "root": "apps/ngx-diagrams-e2e",
-      "sourceRoot": "apps/ngx-diagrams-e2e/src",
+    "ngx-diagrams-angular-e2e": {
+      "root": "apps/ngx-diagrams-angular-e2e",
+      "sourceRoot": "apps/ngx-diagrams-angular-e2e/src",
       "projectType": "application",
       "architect": {
         "e2e": {
           "builder": "@nrwl/cypress:cypress",
           "options": {
-            "cypressConfig": "apps/ngx-diagrams-e2e/cypress.json",
-            "tsConfig": "apps/ngx-diagrams-e2e/tsconfig.e2e.json",
+            "cypressConfig": "apps/ngx-diagrams-angular-e2e/cypress.json",
+            "tsConfig": "apps/ngx-diagrams-angular-e2e/tsconfig.e2e.json",
             "devServerTarget": "ngx-diagrams:storybook"
           },
           "configurations": {
@@ -90,8 +87,40 @@
         "lint": {
           "builder": "@nrwl/linter:lint",
           "options": {
-            "tsConfig": ["apps/ngx-diagrams-e2e/tsconfig.e2e.json"],
-            "exclude": ["**/node_modules/**", "!apps/ngx-diagrams-e2e/**"]
+            "tsConfig": ["apps/ngx-diagrams-angular-e2e/tsconfig.e2e.json"],
+            "exclude": ["**/node_modules/**", "!apps/ngx-diagrams-angular-e2e/**"]
+          }
+        }
+      }
+    },
+    "core": {
+      "root": "libs/core",
+      "sourceRoot": "libs/core/src",
+      "projectType": "library",
+      "architect": {
+        "lint": {
+          "builder": "@nrwl/linter:lint",
+          "options": {
+            "tsConfig": ["libs/core/tsconfig.lib.json", "libs/core/tsconfig.spec.json"]
+          }
+        },
+        "test": {
+          "builder": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/core"],
+          "options": {
+            "jestConfig": "libs/core/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "build": {
+          "builder": "@nrwl/node:package",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/libs/core",
+            "tsConfig": "libs/core/tsconfig.lib.json",
+            "packageJson": "libs/core/package.json",
+            "main": "libs/core/src/index.ts",
+            "assets": ["libs/core/*.md"]
           }
         }
       }
@@ -120,7 +149,10 @@
     "@nrwl/angular:library": {
       "unitTestRunner": "jest",
       "e2eTestRunner": "cypress"
+    },
+    "@nrwl/angular:component": {
+      "style": "scss"
     }
   },
-  "defaultProject": "ngx-diagrams"
+  "defaultProject": "core"
 }

@@ -14,9 +14,11 @@
     "lib": ["es2017", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
+    "downlevelIteration": true,
     "baseUrl": ".",
     "paths": {
-      "ngx-diagrams": ["libs/ngx-diagrams/src/index.ts"]
+      "@ngx-diagrams/angular": ["libs/angular/src/index.ts"],
+      "@ngx-diagrams/core": ["libs/core/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

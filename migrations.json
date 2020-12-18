@@ -1,0 +1,18 @@
+{
+  "migrations": [
+    {
+      "version": "11.0.2",
+      "description": "Rename the workspace-schematic script into workspace-generator script",
+      "factory": "./src/migrations/update-11-0-0/rename-workspace-schematic-script",
+      "package": "@nrwl/workspace",
+      "name": "rename-workspace-schematic-script"
+    },
+    {
+      "version": "11.0.12",
+      "description": "Update storybook if installed and above 6",
+      "factory": "./src/migrations/update-11-0-12/update-storybook",
+      "package": "@nrwl/storybook",
+      "name": "update-11-0-12"
+    }
+  ]
+}
