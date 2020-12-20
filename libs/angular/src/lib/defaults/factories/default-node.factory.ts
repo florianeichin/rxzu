@@ -1,15 +1,20 @@
 import { DefaultNodeComponent } from '../components/default-node/default-node.component';
-import { AbstractNodeFactory } from '../../factories/node.factory';
 import { ComponentFactoryResolver, ViewContainerRef, ComponentRef, ComponentFactory, Renderer2 } from '@angular/core';
-import { DefaultNodeModel } from '../models/default-node.model';
+import { AbstractAngularFactory, DefaultNodeModel } from '@ngx-diagrams/core';
 
-export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
+export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeComponent> {
   constructor(protected resolver: ComponentFactoryResolver, protected renderer: Renderer2) {
     super('default');
   }
 
-  generateWidget(node: DefaultNodeModel, nodesHost: ViewContainerRef): ComponentRef<DefaultNodeComponent> {
-    const componentRef = nodesHost.createComponent(this.getRecipe());
+  generateWidget({
+    model,
+    host
+  }: {
+    model: DefaultNodeModel;
+    host: ViewContainerRef;
+  }): ComponentRef<DefaultNodeComponent> {
+    const componentRef = host.createComponent(this.getRecipe());
 
     // attach coordinates and default positional behaviour to the generated component host
     const rootNode = componentRef.location.nativeElement;
@@ -19,24 +24,24 @@ export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
     this.renderer.setStyle(rootNode, 'display', 'block');
 
     // data attributes
-    this.renderer.setAttribute(rootNode, 'data-nodeid', node.id);
+    this.renderer.setAttribute(rootNode, 'data-nodeid', model.id);
 
     // subscribe to node coordinates
-    node.selectCoords().subscribe(({ x, y }) => {
+    model.selectCoords().subscribe(({ x, y }) => {
       this.renderer.setStyle(rootNode, 'left', `${x}px`);
       this.renderer.setStyle(rootNode, 'top', `${y}px`);
     });
 
-    node.selectionChanges().subscribe((e) => {
+    model.selectionChanges().subscribe((e) => {
       e.isSelected ? this.renderer.addClass(rootNode, 'selected') : this.renderer.removeClass(rootNode, 'selected');
     });
 
-    node.onEntityDestroy().subscribe(() => {
+    model.onEntityDestroy().subscribe(() => {
       componentRef.destroy();
     });
 
     // assign all passed properties to node initialization.
-    Object.entries(node).forEach(([key, value]) => {
+    Object.entries(model).forEach(([key, value]) => {
       componentRef.instance[key] = value;
     });
 
@@ -46,9 +51,5 @@ export class DefaultNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
 
   getRecipe(): ComponentFactory<DefaultNodeComponent> {
     return this.resolver.resolveComponentFactory(DefaultNodeComponent);
-  }
-
-  getNewInstance(initialConfig?: any): DefaultNodeModel {
-    return new DefaultNodeModel(initialConfig);
   }
 }

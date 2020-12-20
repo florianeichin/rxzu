@@ -1,4 +1,5 @@
-import { PortModel, HashMap, LinkModel } from '@ngx-diagrams/core';
+import { PortModel, LinkModel } from '../../models';
+import { HashMap } from '../../utils';
 import { DefaultLinkModel } from './default-link.model';
 
 export interface DefaultPortModelConfig {

@@ -6,10 +6,9 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { createValueState, PointModel, generateCurvePath, Coords } from '@ngx-diagrams/core';
+import { createValueState, PointModel, generateCurvePath, Coords, DefaultLinkModel } from '@ngx-diagrams/core';
 import { combineLatest, Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DefaultLinkModel } from '../../models/default-link.model';
 
 @Component({
   selector: 'ngdx-default-link',

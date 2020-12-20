@@ -1,15 +1,20 @@
 import { ViewContainerRef, ComponentRef, ComponentFactoryResolver, ComponentFactory, Renderer2 } from '@angular/core';
-import { AbstractLabelFactory } from '../../factories/label.factory';
+import { AbstractAngularFactory, DefaultLabelModel } from '@ngx-diagrams/core';
 import { DefaultLabelComponent } from '../components/default-label/default-label.component';
-import { DefaultLabelModel } from '../models/default-label.model';
 
-export class DefaultLabelFactory extends AbstractLabelFactory<DefaultLabelModel> {
+export class DefaultLabelFactory extends AbstractAngularFactory<DefaultLabelComponent> {
   constructor(protected resolver: ComponentFactoryResolver, protected renderer: Renderer2) {
     super('default');
   }
 
-  generateWidget(label: DefaultLabelComponent, labelHost: ViewContainerRef): ComponentRef<DefaultLabelComponent> {
-    const componentRef = labelHost.createComponent(this.getRecipe());
+  generateWidget({
+    model,
+    host
+  }: {
+    model: DefaultLabelModel;
+    host: ViewContainerRef;
+  }): ComponentRef<DefaultLabelComponent> {
+    const componentRef = host.createComponent(this.getRecipe());
 
     // attach coordinates and default positional behaviour to the generated component host
     const rootNode = componentRef.location.nativeElement;
@@ -18,15 +23,15 @@ export class DefaultLabelFactory extends AbstractLabelFactory<DefaultLabelModel>
     this.renderer.setStyle(rootNode, 'position', 'absolute');
 
     // data attributes
-    this.renderer.setAttribute(rootNode, 'data-labelid', label.id);
+    this.renderer.setAttribute(rootNode, 'data-labelid', model.id);
 
     // on destroy make sure to destroy the componentRef
-    label.onEntityDestroy().subscribe(() => {
+    model.onEntityDestroy().subscribe(() => {
       componentRef.destroy();
     });
 
     // assign all passed properties to node initialization.
-    Object.entries(label).forEach(([key, value]) => {
+    Object.entries(model).forEach(([key, value]) => {
       componentRef.instance[key] = value;
     });
 
@@ -36,9 +41,5 @@ export class DefaultLabelFactory extends AbstractLabelFactory<DefaultLabelModel>
 
   getRecipe(): ComponentFactory<DefaultLabelComponent> {
     return this.resolver.resolveComponentFactory(DefaultLabelComponent);
-  }
-
-  getNewInstance() {
-    return new DefaultLabelModel();
   }
 }

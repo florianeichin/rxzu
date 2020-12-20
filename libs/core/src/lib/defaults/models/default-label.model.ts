@@ -1,5 +1,6 @@
-import { LabelModel, createValueState } from '@ngx-diagrams/core';
 import { Observable } from 'rxjs';
+import { LabelModel } from '../../models';
+import { createValueState } from '../../state';
 
 export class DefaultLabelModel extends LabelModel {
   protected label$ = createValueState<string>('', this.entityPipe('label'));

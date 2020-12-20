@@ -60,14 +60,6 @@ export class CustomPortFactory extends AbstractPortFactory<
     return this.resolver.resolveComponentFactory(CustomPortComponent);
   }
 
-  getNewInstance(initialConfig?: any): DefaultPortModel {
-    return new DefaultPortModel({
-      isInput: true,
-      name: 'unknown',
-      ...initialConfig,
-    });
-  }
-
   isConnected(port: DefaultPortModel): Observable<boolean> {
     return port.selectLinks().pipe(
       takeUntil(port.onEntityDestroy()),

@@ -1,15 +1,38 @@
-import { delay, filter, take } from 'rxjs/operators';
+import { delay, filter, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { BaseEntity } from './base.entity';
-import { DiagramModel, PortModel, NodeModel } from './models';
+import { FactoriesManager } from './factories';
+import { AbstractAngularFactory } from './factories/angular.factory';
+import { DiagramModel, PortModel, NodeModel, LinkModel, BaseModel } from './models';
 import { createValueState } from './state';
+import { BaseAction, EntityMap, SelectingAction } from '..';
 
 export class DiagramEngineCore {
   protected canvas$ = createValueState<Element>(null);
+  protected factoriesManager: FactoriesManager<AbstractAngularFactory>;
   diagramModel: DiagramModel;
 
+  protected nodes$: Observable<EntityMap<NodeModel>>;
+  protected links$: Observable<EntityMap<LinkModel>>;
+  protected nodesRendered$ = new BehaviorSubject<boolean>(false);
+  protected action$ = new BehaviorSubject<BaseAction>(null);
+
   createDiagram() {
+    if (this.diagramModel) {
+      throw new Error('diagram model already exists, please reset model prior to creating new diagram');
+    }
+
+    if (this.factoriesManager) {
+      this.factoriesManager.dispose();
+    }
+
     this.diagramModel = new DiagramModel(this);
+    this.factoriesManager = new FactoriesManager();
     return this.diagramModel;
+  }
+
+  getFactoriesManager() {
+    return this.factoriesManager;
   }
 
   getNodeElement(node: NodeModel): HTMLElement {
@@ -142,5 +165,159 @@ export class DiagramEngineCore {
       // TODO: either block the canvas movement on 0,0 or detect the top left furthest element and set the offest to its edges
       this.diagramModel.setOffset(0, 0);
     });
+  }
+
+  setup({ maxZoomIn, maxZoomOut }: { maxZoomIn: number; maxZoomOut: number }) {
+    this.diagramModel.setMaxZoomIn(maxZoomIn);
+    this.diagramModel.setMaxZoomOut(maxZoomOut);
+  }
+
+  initNodes(host) {
+    this.diagramModel.selectNodes();
+
+    this.diagramModel
+      .selectNodes()
+      .pipe(takeUntil(this.diagramModel.onEntityDestroy()))
+      .subscribe((nodes) => {
+        this.nodesRendered$.next(false);
+
+        for (const node of nodes.values()) {
+          if (!node.getPainted()) {
+            this.diagramModel
+              .getDiagramEngine()
+              .getFactoriesManager()
+              .getFactory({ factoryType: 'nodeFactories', modelType: node.getType() })
+              .generateWidget({ model: node, host });
+          }
+        }
+
+        this.nodesRendered$.next(true);
+      });
+  }
+
+  initLinks(host) {
+    this.links$ = this.diagramModel.selectLinks();
+
+    combineLatest([this.nodesRendered$, this.links$])
+      .pipe(filter(([nodesRendered]) => !!nodesRendered))
+      .subscribe(([, links]) => {
+        for (const link of links.values()) {
+          if (!link.getPainted() && link.getSourcePort().getPainted()) {
+            if (link.getSourcePort() !== null) {
+              const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getSourcePort());
+              link.getPoints()[0].setCoords(portCenter);
+
+              const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getSourcePort());
+              link.getSourcePort().updateCoords(portCoords);
+            }
+
+            if (link.getTargetPort() !== null) {
+              const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getTargetPort());
+              link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
+
+              const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getTargetPort());
+              link.getTargetPort().updateCoords(portCoords);
+            }
+
+            this.diagramModel
+              .getDiagramEngine()
+              .getFactoriesManager()
+              .getFactory({ factoryType: 'linkFactories', modelType: link.getType() })
+              .generateWidget({ model: link, host });
+          }
+        }
+      });
+  }
+
+  /**
+   * fire the action registered and notify subscribers
+   */
+  fireAction() {
+    if (this.action$.value) {
+      return this.action$.getValue();
+    }
+  }
+
+  /**
+   * Unregister the action, post firing and notify subscribers
+   */
+  stopFiringAction() {
+    const stoppedAction = this.action$.getValue();
+    this.action$.next(null);
+    return stoppedAction;
+  }
+
+  /**
+   * Register the new action, pre firing and notify subscribers
+   */
+  startFiringAction(action: BaseAction) {
+    this.action$.next(action);
+    return action;
+  }
+
+  selectAction() {
+    return this.action$ as BehaviorSubject<BaseAction>;
+  }
+
+  setAction(action: BaseAction) {
+    this.action$.next(action);
+  }
+
+  shouldDrawSelectionBox() {
+    const action = this.action$.getValue();
+    if (action instanceof SelectingAction) {
+      action.getBoxDimensions();
+      return true;
+    }
+    return false;
+  }
+
+  getMouseElement(event: MouseEvent): { model: BaseModel; element: Element } {
+    const target = event.target as Element;
+
+    // is it a port?
+    let element = target.closest('[data-portid]');
+    if (element) {
+      // get the relevant node and return the port.
+      const nodeEl = target.closest('[data-nodeid]');
+      return {
+        model: this.diagramModel
+          .getNode(nodeEl.getAttribute('data-nodeid'))
+          .getPort(element.getAttribute('data-portid')),
+        element
+      };
+    }
+
+    // look for a point
+    element = target.closest('[data-pointid]');
+    if (element) {
+      return {
+        model: this.diagramModel
+          .getLink(element.getAttribute('data-linkid'))
+          .getPointModel(element.getAttribute('data-pointid')),
+        element
+      };
+    }
+
+    // look for a link
+    element = target.closest('[data-linkid]');
+    if (element) {
+      return {
+        model: this.diagramModel.getLink(element.getAttribute('data-linkid')),
+        element
+      };
+    }
+
+    // a node maybe
+    element = target.closest('[data-nodeid]');
+    if (element) {
+      return {
+        model: this.diagramModel.getNode(element.getAttribute('data-nodeid')),
+        element
+      };
+    }
+
+    // just the canvas
+    return null;
   }
 }

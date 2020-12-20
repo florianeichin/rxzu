@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ViewChild, ViewContainerRef } from '@angular/core';
-import { DefaultNodeModel } from '../../models/default-node.model';
+import { DefaultNodeModel } from '@ngx-diagrams/core';
 
 @Component({
   selector: 'ngdx-default-node',

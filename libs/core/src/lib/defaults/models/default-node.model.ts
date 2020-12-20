@@ -1,6 +1,6 @@
-import { NodeModel } from '@ngx-diagrams/core';
 import { Observable } from 'rxjs';
 import { DefaultPortModel } from './default-port.model';
+import { NodeModel } from '../../models/node.model';
 
 export class DefaultNodeModel extends NodeModel {
   name: string;

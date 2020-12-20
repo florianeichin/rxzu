@@ -1,14 +1,6 @@
 import { Meta, moduleMetadata } from '@storybook/angular';
 import { CommonModule } from '@angular/common';
 import {
-  DagreEngine,
-  DefaultLabelComponent,
-  DefaultLinkComponent,
-  DefaultNodeComponent,
-  DefaultPortComponent,
-  NgxDiagramsModule
-} from 'ngx-diagrams';
-import {
   AutoArrangeDiagramTemplate,
   BasicDiagramTemplate,
   PerformanceDiagramTemplate,
@@ -20,6 +12,14 @@ import { SerializationExampleStoryComponent } from './serialization/serializatio
 import { AutoArrangeExampleStoryComponent } from './auto-arrange/auto-arrange.component';
 import { SmartRoutingExampleStoryComponent } from './smart-routing/smart-routing.component';
 import { PerformanceExampleStoryComponent } from './performance/performance.component';
+import {
+  DefaultLinkComponent,
+  DefaultNodeComponent,
+  DefaultLabelComponent,
+  DefaultPortComponent,
+  DagreEngine,
+  NgxDiagramsModule
+} from '@ngx-diagrams/angular';
 
 export default {
   title: 'Examples',

@@ -1,5 +1,6 @@
-import { LinkModel, createValueState } from '@ngx-diagrams/core';
 import { Observable } from 'rxjs';
+import { LinkModel } from '../../models';
+import { createValueState } from '../../state';
 
 export class DefaultLinkModel extends LinkModel {
   width$ = createValueState<number>(3, this.entityPipe('width'));

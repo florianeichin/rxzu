@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { DefaultPortModel } from '../../models/default-port.model';
+import { DefaultPortModel } from '@ngx-diagrams/core';
 
 @Component({
   selector: 'ngdx-default-port',

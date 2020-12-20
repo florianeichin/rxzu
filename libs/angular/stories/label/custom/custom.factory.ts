@@ -49,8 +49,4 @@ export class CustomLabelFactory extends AbstractLabelFactory<
   getRecipe(): ComponentFactory<CustomLabelComponent> {
     return this.resolver.resolveComponentFactory(CustomLabelComponent);
   }
-
-  getNewInstance() {
-    return new DefaultLabelModel();
-  }
 }

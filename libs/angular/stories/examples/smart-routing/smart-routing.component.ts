@@ -1,16 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { DiagramEngine, DiagramModel, DefaultNodeModel } from 'ngx-diagrams';
+import { DiagramEngine, DefaultNodeModel } from '@ngx-diagrams/angular';
+import { DiagramModel } from '@ngx-diagrams/core';
 
 @Component({
   selector: 'app-root',
-  template: `
-    <ngdx-diagram
-      class="demo-diagram"
-      [model]="diagramModel"
-      [smartRouting]="true"
-    ></ngdx-diagram>
-  `,
-  styleUrls: ['../demo-diagram.component.scss'],
+  template: ` <ngdx-diagram class="demo-diagram" [model]="diagramModel" [smartRouting]="true"></ngdx-diagram> `,
+  styleUrls: ['../demo-diagram.component.scss']
 })
 export class SmartRoutingExampleStoryComponent implements OnInit {
   diagramModel: DiagramModel;

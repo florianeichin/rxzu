@@ -58,16 +58,10 @@ export class CustomNodeFactory extends AbstractNodeFactory<DefaultNodeModel> {
       componentRef.instance[key] = value;
     });
 
-    componentRef.instance.setDiagramEngine(diagramEngine);
-
     return componentRef;
   }
 
   getRecipe(): ComponentFactory<CustomNodeComponent> {
     return this.resolver.resolveComponentFactory(CustomNodeComponent);
-  }
-
-  getNewInstance(initialConfig?: any): DefaultNodeModel {
-    return new DefaultNodeModel(...initialConfig);
   }
 }

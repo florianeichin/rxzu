@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { DefaultLabelModel } from '../../models/default-label.model';
+import { DefaultLabelModel } from '@ngx-diagrams/core';
 
 @Component({
   selector: 'ngdx-default-label',

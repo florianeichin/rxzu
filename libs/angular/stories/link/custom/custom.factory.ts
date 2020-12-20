@@ -1,22 +1,9 @@
-import {
-  ViewContainerRef,
-  ComponentRef,
-  ComponentFactoryResolver,
-  ComponentFactory,
-  Renderer2,
-} from '@angular/core';
-import {
-  AbstractLinkFactory,
-  DefaultLinkModel,
-  DiagramEngine,
-} from 'ngx-diagrams';
+import { ViewContainerRef, ComponentRef, ComponentFactoryResolver, ComponentFactory, Renderer2 } from '@angular/core';
+import { AbstractLinkFactory, DefaultLinkModel, DiagramEngine } from 'ngx-diagrams';
 import { CustomLinkComponent } from './custom-link.component';
 
 export class CustomLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
-  constructor(
-    private resolver: ComponentFactoryResolver,
-    private renderer: Renderer2
-  ) {
+  constructor(private resolver: ComponentFactoryResolver, private renderer: Renderer2) {
     super('custom-link');
   }
 
@@ -47,16 +34,10 @@ export class CustomLinkFactory extends AbstractLinkFactory<DefaultLinkModel> {
       componentRef.instance[key] = value;
     });
 
-    componentRef.instance.diagramEngine = diagramEngine;
-    componentRef.instance.setPainted(true);
     return componentRef;
   }
 
   getRecipe(): ComponentFactory<CustomLinkComponent> {
     return this.resolver.resolveComponentFactory(CustomLinkComponent);
-  }
-
-  getNewInstance() {
-    return new DefaultLinkModel({ type: 'custom-link' });
   }
 }
