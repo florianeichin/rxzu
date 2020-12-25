@@ -88,6 +88,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
       this.diagramEngine.initNodes(this.nodesLayer);
       this.diagramEngine.initLinks(this.linksLayer);
       this.initSubs();
+      this.cdRef.detectChanges();
     }
   }
 

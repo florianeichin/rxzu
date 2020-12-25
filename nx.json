@@ -32,6 +32,9 @@
     },
     "core": {
       "tags": []
+    },
+    "shared-storybook": {
+      "tags": []
     }
   }
 }

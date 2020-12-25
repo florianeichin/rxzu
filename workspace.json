@@ -33,36 +33,6 @@
               "tsConfig": "libs/angular/tsconfig.lib.prod.json"
             }
           }
-        },
-        "storybook": {
-          "builder": "@nrwl/storybook:storybook",
-          "options": {
-            "uiFramework": "@storybook/angular",
-            "port": 4400,
-            "config": {
-              "configFolder": "libs/angular/.storybook"
-            }
-          },
-          "configurations": {
-            "ci": {
-              "quiet": true
-            }
-          }
-        },
-        "build-storybook": {
-          "builder": "@nrwl/storybook:build",
-          "options": {
-            "uiFramework": "@storybook/angular",
-            "outputPath": "dist/storybook/angular",
-            "config": {
-              "configFolder": "libs/angular/.storybook"
-            }
-          },
-          "configurations": {
-            "ci": {
-              "quiet": true
-            }
-          }
         }
       }
     },
@@ -76,11 +46,11 @@
           "options": {
             "cypressConfig": "apps/ngx-diagrams-angular-e2e/cypress.json",
             "tsConfig": "apps/ngx-diagrams-angular-e2e/tsconfig.e2e.json",
-            "devServerTarget": "ngx-diagrams:storybook"
+            "devServerTarget": "shared-storybook:storybook"
           },
           "configurations": {
             "ci": {
-              "devServerTarget": "ngx-diagrams:storybook:ci"
+              "devServerTarget": "shared-storybook:storybook:ci"
             }
           }
         },
@@ -124,6 +94,49 @@
           }
         }
       }
+    },
+    "shared-storybook": {
+      "projectType": "library",
+      "root": "libs/storybook",
+      "sourceRoot": "libs/storybook/src",
+      "prefix": "sharedstorybook",
+      "architect": {
+        "storybook": {
+          "builder": "@nrwl/storybook:storybook",
+          "options": {
+            "uiFramework": "@storybook/angular",
+            "port": 4400,
+            "config": {
+              "configFolder": "libs/storybook/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        },
+        "build-storybook": {
+          "builder": "@nrwl/storybook:build",
+          "options": {
+            "uiFramework": "@storybook/angular",
+            "outputPath": "dist/storybook/shared-storybook",
+            "config": {
+              "configFolder": "libs/storybook/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        }
+      },
+      "schematics": {
+        "@nrwl/angular:component": {
+          "style": "scss"
+        }
+      }
     }
   },
   "cli": {
@@ -154,5 +167,5 @@
       "style": "scss"
     }
   },
-  "defaultProject": "core"
+  "defaultProject": "angular"
 }

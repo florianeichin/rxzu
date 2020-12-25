@@ -156,20 +156,3 @@ export function generateCurvePath(firstPoint: Coords, lastPoint: Coords, curvy =
   return `M${firstPoint.x},${firstPoint.y} C ${firstPoint.x + curvyX},${firstPoint.y + curvyY}
     ${lastPoint.x - curvyX},${lastPoint.y - curvyY} ${lastPoint.x},${lastPoint.y}`;
 }
-
-// TODO: refactor into a dedicated Smart-Routing plugin
-
-// export function generateDynamicPath(pathCoords: number[][]) {
-//   let path = SVGPath();
-//   path = path.moveto(
-//     pathCoords[0][0] * ROUTING_SCALING_FACTOR,
-//     pathCoords[0][1] * ROUTING_SCALING_FACTOR
-//   );
-//   pathCoords.slice(1).forEach((coords) => {
-//     path = path.lineto(
-//       coords[0] * ROUTING_SCALING_FACTOR,
-//       coords[1] * ROUTING_SCALING_FACTOR
-//     );
-//   });
-//   return path.print();
-// }

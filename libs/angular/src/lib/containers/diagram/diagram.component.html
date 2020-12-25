@@ -11,7 +11,7 @@
 
   <!-- Selection Box -->
   <div
-    *ngIf="diagramEngine.shouldDrawSelectionBox() && selectionAction() | async as action"
+    *ngIf="diagramEngine && diagramEngine.shouldDrawSelectionBox() && selectionAction() | async as action"
     class="selector"
     [ngStyle]="{
       top: action.dimensions.top + 'px',

@@ -17,17 +17,19 @@ export class DiagramEngineCore {
   protected nodesRendered$ = new BehaviorSubject<boolean>(false);
   protected action$ = new BehaviorSubject<BaseAction>(null);
 
-  createDiagram() {
-    if (this.diagramModel) {
-      throw new Error('diagram model already exists, please reset model prior to creating new diagram');
-    }
-
+  constructor() {
     if (this.factoriesManager) {
       this.factoriesManager.dispose();
     }
 
-    this.diagramModel = new DiagramModel(this);
     this.factoriesManager = new FactoriesManager();
+  }
+
+  createDiagram() {
+    if (this.diagramModel) {
+      throw new Error('diagram model already exists, please reset model prior to creating new diagram');
+    }
+    this.diagramModel = new DiagramModel(this);
     return this.diagramModel;
   }
 
