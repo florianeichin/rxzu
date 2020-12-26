@@ -1,9 +1,9 @@
-import { delay, filter, take, takeUntil } from 'rxjs/operators';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
+import { delay, filter, map, take, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { BaseEntity } from './base.entity';
 import { FactoriesManager } from './factories';
 import { AbstractAngularFactory } from './factories/angular.factory';
-import { DiagramModel, PortModel, NodeModel, LinkModel, BaseModel } from './models';
+import { DiagramModel, PortModel, NodeModel, LinkModel, BaseModel, LabelModel } from './models';
 import { createValueState } from './state';
 import { BaseAction, EntityMap, SelectingAction } from '..';
 
@@ -174,61 +174,80 @@ export class DiagramEngineCore {
     this.diagramModel.setMaxZoomOut(maxZoomOut);
   }
 
-  initNodes(host) {
-    this.diagramModel.selectNodes();
-
-    this.diagramModel
-      .selectNodes()
-      .pipe(takeUntil(this.diagramModel.onEntityDestroy()))
-      .subscribe((nodes) => {
+  paintNodes(nodesHost, promise = false): Observable<void> | Promise<void> {
+    const observable = this.diagramModel.selectNodes().pipe(
+      takeUntil(this.diagramModel.onEntityDestroy()),
+      map((nodes) => {
         this.nodesRendered$.next(false);
 
         for (const node of nodes.values()) {
           if (!node.getPainted()) {
-            this.diagramModel
-              .getDiagramEngine()
-              .getFactoriesManager()
+            this.getFactoriesManager()
               .getFactory({ factoryType: 'nodeFactories', modelType: node.getType() })
-              .generateWidget({ model: node, host });
+              .generateWidget({ model: node, host: nodesHost, diagramModel: this.diagramModel });
           }
         }
 
         this.nodesRendered$.next(true);
-      });
+      })
+    );
+
+    return promise ? observable.toPromise() : observable;
   }
 
-  initLinks(host) {
-    this.links$ = this.diagramModel.selectLinks();
-
-    combineLatest([this.nodesRendered$, this.links$])
-      .pipe(filter(([nodesRendered]) => !!nodesRendered))
-      .subscribe(([, links]) => {
+  paintLinks(linksHost, promise = false): Observable<void> | Promise<void> {
+    const observable = this.diagramModel.selectLinks().pipe(
+      takeUntil(this.diagramModel.onEntityDestroy()),
+      map((links) => {
         for (const link of links.values()) {
-          if (!link.getPainted() && link.getSourcePort().getPainted()) {
-            if (link.getSourcePort() !== null) {
-              const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getSourcePort());
-              link.getPoints()[0].setCoords(portCenter);
+          console.log(link);
+          if (!link.getPainted()) {
+            const srcPort = link.getSourcePort();
+            const targetPort = link.getTargetPort();
 
-              const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getSourcePort());
-              link.getSourcePort().updateCoords(portCoords);
-            }
+            // Attach link first point to source port
+            combineLatest([srcPort.paintChanges(), targetPort ? targetPort.paintChanges() : of(null)])
+              .pipe(
+                filter(([paintSrcE]) => paintSrcE.isPainted),
+                tap(([paintSrcE, paintTargetE]) => {
+                  if (srcPort && paintSrcE.isPainted) {
+                    const portCenter = this.getPortCenter(srcPort);
+                    link.getPoints()[0].setCoords(portCenter);
+                  }
 
-            if (link.getTargetPort() !== null) {
-              const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(link.getTargetPort());
-              link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
+                  // Attach link last point to target port, will occour only for complete links
+                  if (targetPort && paintTargetE.isPainted) {
+                    const portCenter = this.getPortCenter(targetPort);
+                    link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
+                  }
+                })
+              )
+              .subscribe(() => {
+                // Render link component
+                this.getFactoriesManager()
+                  .getFactory({ factoryType: 'linkFactories', modelType: link.getType() })
+                  .generateWidget({ model: link, host: linksHost });
 
-              const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(link.getTargetPort());
-              link.getTargetPort().updateCoords(portCoords);
-            }
-
-            this.diagramModel
-              .getDiagramEngine()
-              .getFactoriesManager()
-              .getFactory({ factoryType: 'linkFactories', modelType: link.getType() })
-              .generateWidget({ model: link, host });
+                // Handle link label, if any
+                const label = link.getLabel();
+                if (label) {
+                  this.paintLabel(link.getLabel(), linksHost);
+                }
+              });
           }
         }
-      });
+      })
+    );
+
+    return promise ? observable.toPromise() : observable;
+  }
+
+  paintLabel(label: LabelModel, host) {
+    if (!label.getPainted()) {
+      this.getFactoriesManager()
+        .getFactory({ factoryType: 'labelFactories', modelType: label.getType() })
+        .generateWidget({ model: label, host });
+    }
   }
 
   /**

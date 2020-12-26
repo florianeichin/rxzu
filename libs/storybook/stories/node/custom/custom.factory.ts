@@ -36,7 +36,7 @@ export class CustomNodeFactory extends AbstractAngularFactory<DefaultNodeModel> 
       e.isSelected ? this.renderer.addClass(rootNode, 'selected') : this.renderer.removeClass(rootNode, 'selected');
     });
 
-    model.onEntityDestroy().subscribe((e) => {
+    model.onEntityDestroy().subscribe(() => {
       componentRef.destroy();
     });
 

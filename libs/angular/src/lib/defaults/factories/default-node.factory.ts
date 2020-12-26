@@ -1,6 +1,6 @@
 import { DefaultNodeComponent } from '../components/default-node/default-node.component';
 import { ComponentFactoryResolver, ViewContainerRef, ComponentRef, ComponentFactory, Renderer2 } from '@angular/core';
-import { AbstractAngularFactory, DefaultNodeModel } from '@ngx-diagrams/core';
+import { AbstractAngularFactory, DefaultNodeModel, DiagramModel } from '@ngx-diagrams/core';
 
 export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeComponent> {
   constructor(protected resolver: ComponentFactoryResolver, protected renderer: Renderer2) {
@@ -9,12 +9,14 @@ export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeCompon
 
   generateWidget({
     model,
-    host
+    host,
+    diagramModel
   }: {
     model: DefaultNodeModel;
     host: ViewContainerRef;
+    diagramModel?: DiagramModel;
   }): ComponentRef<DefaultNodeComponent> {
-    const componentRef = host.createComponent(this.getRecipe());
+    const componentRef = host.createComponent(this.getRecipe(), host.length);
 
     // attach coordinates and default positional behaviour to the generated component host
     const rootNode = componentRef.location.nativeElement;
@@ -44,7 +46,7 @@ export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeCompon
     Object.entries(model).forEach(([key, value]) => {
       componentRef.instance[key] = value;
     });
-
+    componentRef.instance.setParent(diagramModel);
     componentRef.instance.setPainted(true);
     return componentRef;
   }

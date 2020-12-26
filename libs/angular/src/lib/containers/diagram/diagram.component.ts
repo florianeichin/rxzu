@@ -15,8 +15,8 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { BehaviorSubject, combineLatest, fromEvent, merge, ReplaySubject } from 'rxjs';
-import { take, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, fromEvent, merge, Observable, ReplaySubject } from 'rxjs';
+import { switchMap, take, takeUntil, tap } from 'rxjs/operators';
 import {
   BaseAction,
   BaseModel,
@@ -85,10 +85,12 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
       this.diagramEngine = this.diagramModel.getDiagramEngine();
       this.diagramEngine.setCanvas(this.canvas.nativeElement);
       this.diagramEngine.setup({ maxZoomIn: this.maxZoomIn, maxZoomOut: this.maxZoomOut });
-      this.diagramEngine.initNodes(this.nodesLayer);
-      this.diagramEngine.initLinks(this.linksLayer);
-      this.initSubs();
-      this.cdRef.detectChanges();
+      (this.diagramEngine.paintNodes(this.nodesLayer) as Observable<void>)
+        .pipe(switchMap(() => this.diagramEngine.paintLinks(this.linksLayer) as Observable<void>))
+        .subscribe(() => {
+          this.initSubs();
+          this.cdRef.detectChanges();
+        });
     }
   }
 
@@ -225,7 +227,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
     }
 
     if (action instanceof SelectingAction) {
-      const relative = this.diagramModel.getDiagramEngine().getRelativePoint(event.clientX, event.clientY);
+      const relative = this.diagramEngine.getRelativePoint(event.clientX, event.clientY);
 
       this.diagramModel.getNodes().forEach((node) => {
         if ((action as SelectingAction).containsElement(node.getCoords(), this.diagramModel)) {
@@ -288,7 +290,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
               const portCoords = port.getCoords();
               const distance = Math.hypot(portCoords.x - newCoords.x, portCoords.y - newCoords.y);
               if (distance <= this.portMagneticRadius) {
-                const portCenter = this.diagramModel.getDiagramEngine().getPortCenter(port);
+                const portCenter = this.diagramEngine.getPortCenter(port);
                 selectionModel.model.setCoords(portCenter);
                 selectionModel.magnet = port;
                 return;
@@ -301,7 +303,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
           if (selectionModel.model instanceof NodeModel) {
             // update port coordinates as well
             selectionModel.model.getPorts().forEach((port) => {
-              const portCoords = this.diagramModel.getDiagramEngine().getPortCoords(port);
+              const portCoords = this.diagramEngine.getPortCoords(port);
               port.updateCoords(portCoords);
             });
           }
@@ -346,7 +348,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
       // multiple selection
       if (event.shiftKey) {
         // initiate multiple selection selector
-        const relative = this.diagramModel.getDiagramEngine().getRelativePoint(event.clientX, event.clientY);
+        const relative = this.diagramEngine.getRelativePoint(event.clientX, event.clientY);
         this.actionStartedFiring.emit(
           this.diagramEngine.startFiringAction(new SelectingAction(relative.x, relative.y))
         );
@@ -360,7 +362,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
     } else if (selectedModel.model instanceof PortModel) {
       // its a port element, we want to drag a link
       if (!selectedModel.model.isLocked() && selectedModel.model.getCanCreateLinks()) {
-        const relative = this.diagramModel.getDiagramEngine().getRelativeMousePoint(event);
+        const relative = this.diagramEngine.getRelativeMousePoint(event);
         const sourcePort = selectedModel.model;
         const link = sourcePort.createLinkModel();
 
@@ -381,9 +383,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
           this.diagramModel.addLink(link);
 
           this.actionStartedFiring.emit(
-            this.diagramEngine.startFiringAction(
-              new MoveItemsAction(event.clientX, event.clientY, this.diagramModel.getDiagramEngine())
-            )
+            this.diagramEngine.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.diagramEngine))
           );
         }
       } else {
@@ -400,9 +400,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
       selectedModel.model.setSelected();
 
       this.actionStartedFiring.emit(
-        this.diagramEngine.startFiringAction(
-          new MoveItemsAction(event.clientX, event.clientY, this.diagramModel.getDiagramEngine())
-        )
+        this.diagramEngine.startFiringAction(new MoveItemsAction(event.clientX, event.clientY, this.diagramEngine))
       );
     }
 

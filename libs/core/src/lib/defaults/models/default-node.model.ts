@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { DefaultPortModel } from './default-port.model';
 import { NodeModel } from '../../models/node.model';
 
-export class DefaultNodeModel extends NodeModel {
+export class DefaultNodeModel extends NodeModel<DefaultPortModel> {
   name: string;
   color: string;
   height$: Observable<number>;

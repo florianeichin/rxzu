@@ -9,12 +9,12 @@ export class DefaultPortFactory extends AbstractAngularFactory<DefaultPortCompon
 
   generateWidget({
     model,
-    host
+    host: nodeHost
   }: {
     model: DefaultPortModel;
     host: ViewContainerRef;
   }): ComponentRef<DefaultPortComponent> {
-    const componentRef = host.createComponent(this.getRecipe());
+    const componentRef = nodeHost.createComponent(this.getRecipe());
 
     // attach coordinates and default positional behaviour to the generated component host
     const rootNode = componentRef.location.nativeElement as HTMLElement;
