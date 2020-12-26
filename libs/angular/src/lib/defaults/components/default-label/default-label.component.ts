@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { DefaultLabelModel } from '@ngx-diagrams/core';
 
 @Component({
@@ -7,8 +7,12 @@ import { DefaultLabelModel } from '@ngx-diagrams/core';
   styleUrls: ['./default-label.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DefaultLabelComponent extends DefaultLabelModel {
+export class DefaultLabelComponent extends DefaultLabelModel implements OnInit {
   constructor() {
     super('ngdx-default-label');
+  }
+
+  ngOnInit() {
+    this.setPainted(true);
   }
 }

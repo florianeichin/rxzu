@@ -46,8 +46,9 @@ export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeCompon
     Object.entries(model).forEach(([key, value]) => {
       componentRef.instance[key] = value;
     });
+
     componentRef.instance.setParent(diagramModel);
-    componentRef.instance.setPainted(true);
+    componentRef.instance.setGenerated(true);
     return componentRef;
   }
 

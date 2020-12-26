@@ -68,6 +68,8 @@ export class DefaultLinkComponent extends DefaultLinkModel implements AfterViewI
 
         this.cdRef.detectChanges();
       });
+
+    this.setPainted(true);
   }
 
   calcLabelIncline(firstPoint: Coords, secondPoint: Coords): number {

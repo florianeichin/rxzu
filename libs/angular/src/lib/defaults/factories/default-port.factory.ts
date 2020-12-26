@@ -34,7 +34,7 @@ export class DefaultPortFactory extends AbstractAngularFactory<DefaultPortCompon
       componentRef.destroy();
     });
 
-    componentRef.instance.setPainted(true);
+    componentRef.instance.setGenerated(true);
     return componentRef;
   }
 

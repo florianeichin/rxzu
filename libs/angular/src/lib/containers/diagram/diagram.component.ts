@@ -85,7 +85,7 @@ export class NgxDiagramComponent implements AfterViewInit, OnDestroy, ZonedClass
       this.diagramEngine = this.diagramModel.getDiagramEngine();
       this.diagramEngine.setCanvas(this.canvas.nativeElement);
       this.diagramEngine.setup({ maxZoomIn: this.maxZoomIn, maxZoomOut: this.maxZoomOut });
-      (this.diagramEngine.paintNodes(this.nodesLayer) as Observable<void>)
+      (this.diagramEngine.paintNodes(this.nodesLayer) as Observable<boolean>)
         .pipe(switchMap(() => this.diagramEngine.paintLinks(this.linksLayer) as Observable<void>))
         .subscribe(() => {
           this.initSubs();

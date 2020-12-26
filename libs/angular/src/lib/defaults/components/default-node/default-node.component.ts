@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewChild, ViewContainerRef } from '@angular/core';
 import { DefaultNodeModel } from '@ngx-diagrams/core';
-import { filter, switchMap } from 'rxjs/operators';
+import { filter, switchMap, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'ngdx-default-node',
@@ -8,27 +8,27 @@ import { filter, switchMap } from 'rxjs/operators';
   styleUrls: ['./default-node.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DefaultNodeComponent extends DefaultNodeModel implements OnInit {
+export class DefaultNodeComponent extends DefaultNodeModel {
   @ViewChild('portsLayer', { read: ViewContainerRef, static: true })
   portsLayer: ViewContainerRef;
 
   constructor() {
     super({ type: 'ngdx-default-node' });
-  }
-
-  ngOnInit() {
-    const factoriesManager = this.getParent().getDiagramEngine().getFactoriesManager();
-    this.paintChanges()
+    this.generatedChanges()
       .pipe(
-        filter((paintedE) => paintedE.isPainted),
+        tap(console.log),
+        filter((generatedE) => generatedE.isGenerated),
         switchMap(() => this.selectPorts())
       )
       .subscribe((ports) => {
+        const factoriesManager = this.getParent().getDiagramEngine().getFactoriesManager();
+        console.log(ports);
         for (const port of ports) {
           factoriesManager
             .getFactory({ factoryType: 'portFactories', modelType: port.getType() })
             .generateWidget({ model: port, host: this.portsLayer });
         }
+        this.setPainted(true);
       });
   }
 }

@@ -35,7 +35,7 @@ export class DefaultLabelFactory extends AbstractAngularFactory<DefaultLabelComp
       componentRef.instance[key] = value;
     });
 
-    componentRef.instance.setPainted(true);
+    componentRef.instance.setGenerated(true);
     return componentRef;
   }
 

@@ -1,5 +1,5 @@
-import { delay, filter, map, take, takeUntil, tap } from 'rxjs/operators';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
 import { BaseEntity } from './base.entity';
 import { FactoriesManager } from './factories';
 import { AbstractAngularFactory } from './factories/angular.factory';
@@ -14,7 +14,6 @@ export class DiagramEngineCore {
 
   protected nodes$: Observable<EntityMap<NodeModel>>;
   protected links$: Observable<EntityMap<LinkModel>>;
-  protected nodesRendered$ = new BehaviorSubject<boolean>(false);
   protected action$ = new BehaviorSubject<BaseAction>(null);
 
   constructor() {
@@ -174,22 +173,30 @@ export class DiagramEngineCore {
     this.diagramModel.setMaxZoomOut(maxZoomOut);
   }
 
-  paintNodes(nodesHost, promise = false): Observable<void> | Promise<void> {
+  paintNodes(nodesHost, promise = false): Observable<boolean> | Promise<boolean> {
     const observable = this.diagramModel.selectNodes().pipe(
       takeUntil(this.diagramModel.onEntityDestroy()),
-      map((nodes) => {
-        this.nodesRendered$.next(false);
-
+      switchMap((nodes) => {
+        const nodesPainted$ = [];
         for (const node of nodes.values()) {
-          if (!node.getPainted()) {
+          if (!node.getGenerated()) {
             this.getFactoriesManager()
               .getFactory({ factoryType: 'nodeFactories', modelType: node.getType() })
               .generateWidget({ model: node, host: nodesHost, diagramModel: this.diagramModel });
+
+            nodesPainted$.push(
+              node.paintChanges().pipe(
+                filter((paintE) => paintE.isPainted),
+                take(1),
+                tap(console.log)
+              )
+            );
           }
         }
 
-        this.nodesRendered$.next(true);
-      })
+        return combineLatest(nodesPainted$);
+      }),
+      map(() => true)
     );
 
     return promise ? observable.toPromise() : observable;
@@ -200,40 +207,30 @@ export class DiagramEngineCore {
       takeUntil(this.diagramModel.onEntityDestroy()),
       map((links) => {
         for (const link of links.values()) {
-          console.log(link);
           if (!link.getPainted()) {
             const srcPort = link.getSourcePort();
             const targetPort = link.getTargetPort();
 
             // Attach link first point to source port
-            combineLatest([srcPort.paintChanges(), targetPort ? targetPort.paintChanges() : of(null)])
-              .pipe(
-                filter(([paintSrcE]) => paintSrcE.isPainted),
-                tap(([paintSrcE, paintTargetE]) => {
-                  if (srcPort && paintSrcE.isPainted) {
-                    const portCenter = this.getPortCenter(srcPort);
-                    link.getPoints()[0].setCoords(portCenter);
-                  }
+            const portCenter = this.getPortCenter(srcPort);
+            link.getPoints()[0].setCoords(portCenter);
 
-                  // Attach link last point to target port, will occour only for complete links
-                  if (targetPort && paintTargetE.isPainted) {
-                    const portCenter = this.getPortCenter(targetPort);
-                    link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
-                  }
-                })
-              )
-              .subscribe(() => {
-                // Render link component
-                this.getFactoriesManager()
-                  .getFactory({ factoryType: 'linkFactories', modelType: link.getType() })
-                  .generateWidget({ model: link, host: linksHost });
+            // Attach link last point to target port, will occour only for complete links
+            if (targetPort) {
+              const portCenter = this.getPortCenter(targetPort);
+              link.getPoints()[link.getPoints().length - 1].setCoords(portCenter);
+            }
 
-                // Handle link label, if any
-                const label = link.getLabel();
-                if (label) {
-                  this.paintLabel(link.getLabel(), linksHost);
-                }
-              });
+            // Render link component
+            this.getFactoriesManager()
+              .getFactory({ factoryType: 'linkFactories', modelType: link.getType() })
+              .generateWidget({ model: link, host: linksHost });
+
+            // Handle link label, if any
+            const label = link.getLabel();
+            if (label) {
+              this.paintLabel(link.getLabel(), linksHost);
+            }
           }
         }
       })

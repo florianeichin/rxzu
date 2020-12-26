@@ -50,3 +50,12 @@ export class PaintedEvent<T extends BaseEntity = BaseEntity> extends BaseEvent<T
     this.isPainted = painted;
   }
 }
+
+export class GeneratedEvent<T extends BaseEntity = BaseEntity> extends BaseEvent<T> {
+  isGenerated: boolean;
+
+  constructor(entity: T, generated = false) {
+    super(entity);
+    this.isGenerated = generated;
+  }
+}

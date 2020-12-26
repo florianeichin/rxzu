@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { BaseEntity } from '../base.entity';
-import { PaintedEvent, ParentChangeEvent, SelectionEvent } from '../interfaces/event.interface';
+import { GeneratedEvent, PaintedEvent, ParentChangeEvent, SelectionEvent } from '../interfaces/event.interface';
 import { createValueState } from '../state';
 
 export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
@@ -10,6 +10,7 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
   protected selected$ = createValueState<boolean>(false, this.entityPipe('SelectedChange'));
   protected hovered$ = createValueState<boolean>(false, this.entityPipe('HoveredChange'));
   protected painted$ = createValueState<boolean>(false, this.entityPipe('PaintedChange'));
+  protected generated$ = createValueState<boolean>(false, this.entityPipe('GeneratedChange'));
 
   constructor(type?: string, id?: string, logPrefix = '[Base]') {
     super(id, logPrefix);
@@ -43,6 +44,22 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
     this.painted$.set(painted).emit();
   }
 
+  paintChanges(): Observable<PaintedEvent> {
+    return this.painted$.select((p) => new PaintedEvent(this, p));
+  }
+
+  getGenerated(): boolean {
+    return this.generated$.value;
+  }
+
+  setGenerated(generated = true): void {
+    this.generated$.set(generated).emit();
+  }
+
+  generatedChanges(): Observable<GeneratedEvent> {
+    return this.generated$.select((p) => new GeneratedEvent(this, p));
+  }
+
   getHovered(): boolean {
     return this.hovered$.value;
   }
@@ -53,10 +70,6 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
 
   selectHovered(): Observable<boolean> {
     return this.hovered$.value$;
-  }
-
-  paintChanges(): Observable<PaintedEvent> {
-    return this.painted$.select((p) => new PaintedEvent(this, p));
   }
 
   getType(): string {
