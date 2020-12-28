@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  OnInit,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
@@ -16,7 +17,7 @@ import { takeUntil } from 'rxjs/operators';
   styleUrls: ['./default-link.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DefaultLinkComponent extends DefaultLinkModel implements AfterViewInit {
+export class DefaultLinkComponent extends DefaultLinkModel implements AfterViewInit, OnInit {
   @ViewChild('labelLayer', { read: ViewContainerRef, static: true })
   labelLayer: ViewContainerRef;
 
@@ -29,6 +30,10 @@ export class DefaultLinkComponent extends DefaultLinkModel implements AfterViewI
 
   trackByPoints(i: number, point: PointModel) {
     return point.id;
+  }
+
+  ngOnInit() {
+    this.setPainted(true);
   }
 
   ngAfterViewInit() {

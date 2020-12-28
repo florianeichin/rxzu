@@ -1,5 +1,5 @@
-import { delay, filter, map, switchMap, take, takeUntil, tap } from 'rxjs/operators';
-import { BehaviorSubject, combineLatest, forkJoin, Observable } from 'rxjs';
+import { delay, filter, map, switchMap, take, takeUntil } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
 import { BaseEntity } from './base.entity';
 import { FactoriesManager } from './factories';
 import { AbstractAngularFactory } from './factories/angular.factory';
@@ -179,7 +179,7 @@ export class DiagramEngineCore {
       switchMap((nodes) => {
         const nodesPainted$ = [];
         for (const node of nodes.values()) {
-          if (!node.getGenerated()) {
+          if (!node.getPainted()) {
             this.getFactoriesManager()
               .getFactory({ factoryType: 'nodeFactories', modelType: node.getType() })
               .generateWidget({ model: node, host: nodesHost, diagramModel: this.diagramModel });
@@ -187,8 +187,7 @@ export class DiagramEngineCore {
             nodesPainted$.push(
               node.paintChanges().pipe(
                 filter((paintE) => paintE.isPainted),
-                take(1),
-                tap(console.log)
+                take(1)
               )
             );
           }

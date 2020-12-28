@@ -36,7 +36,7 @@ export class DefaultLinkFactory extends AbstractAngularFactory<DefaultLinkCompon
       componentRef.instance[key] = value;
     });
 
-    componentRef.instance.setGenerated(true);
+    componentRef.instance.ngOnInit();
     return componentRef;
   }
 

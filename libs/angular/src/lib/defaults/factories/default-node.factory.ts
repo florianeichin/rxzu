@@ -48,7 +48,7 @@ export class DefaultNodeFactory extends AbstractAngularFactory<DefaultNodeCompon
     });
 
     componentRef.instance.setParent(diagramModel);
-    componentRef.instance.setGenerated(true);
+    componentRef.instance.ngOnInit();
     return componentRef;
   }
 

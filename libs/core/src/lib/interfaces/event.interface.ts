@@ -6,14 +6,12 @@ export class BaseEvent<T extends BaseEntity> {
   entityId: ID;
   firing: boolean;
   id: ID;
-  propogate: boolean;
 
-  constructor(entity: T, options?: any) {
+  constructor(entity: T) {
     this.id = UID();
     this.entity = entity;
     this.entityId = entity.id;
     this.firing = true;
-    this.propogate = options ? options.propagate : null;
   }
 }
 export class LockEvent<T extends BaseEntity = BaseEntity> extends BaseEvent<T> {
@@ -45,17 +43,8 @@ export class SelectionEvent<T extends BaseEntity = BaseEntity> extends BaseEvent
 export class PaintedEvent<T extends BaseEntity = BaseEntity> extends BaseEvent<T> {
   isPainted: boolean;
 
-  constructor(entity: T, painted = false) {
+  constructor(entity: T, painted: boolean) {
     super(entity);
     this.isPainted = painted;
-  }
-}
-
-export class GeneratedEvent<T extends BaseEntity = BaseEntity> extends BaseEvent<T> {
-  isGenerated: boolean;
-
-  constructor(entity: T, generated = false) {
-    super(entity);
-    this.isGenerated = generated;
   }
 }
