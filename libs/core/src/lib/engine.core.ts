@@ -179,7 +179,7 @@ export class DiagramEngineCore {
       switchMap((nodes) => {
         const nodesPainted$ = [];
         for (const node of nodes.values()) {
-          if (!node.getPainted()) {
+          if (!node.getPainted().isPainted) {
             this.getFactoriesManager()
               .getFactory({ factoryType: 'nodeFactories', modelType: node.getType() })
               .generateWidget({ model: node, host: nodesHost, diagramModel: this.diagramModel });
@@ -206,7 +206,7 @@ export class DiagramEngineCore {
       takeUntil(this.diagramModel.onEntityDestroy()),
       map((links) => {
         for (const link of links.values()) {
-          if (!link.getPainted()) {
+          if (!link.getPainted().isPainted) {
             const srcPort = link.getSourcePort();
             const targetPort = link.getTargetPort();
 
@@ -239,7 +239,7 @@ export class DiagramEngineCore {
   }
 
   paintLabel(label: LabelModel, host) {
-    if (!label.getPainted()) {
+    if (!label.getPainted().isPainted) {
       this.getFactoriesManager()
         .getFactory({ factoryType: 'labelFactories', modelType: label.getType() })
         .generateWidget({ model: label, host });

@@ -20,7 +20,7 @@ export class DefaultNodeComponent extends DefaultNodeModel implements OnInit {
     this.selectPorts().subscribe((ports) => {
       const factoriesManager = this.getParent().getDiagramEngine().getFactoriesManager();
       for (const port of ports) {
-        if (!port.getPainted()) {
+        if (!port.getPainted().isPainted) {
           factoriesManager
             .getFactory({ factoryType: 'portFactories', modelType: port.getType() })
             .generateWidget({ model: port, host: this.portsLayer });

@@ -9,7 +9,7 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
   protected parent$ = createValueState<E>(null, this.entityPipe('ParentsChange'));
   protected selected$ = createValueState<boolean>(false, this.entityPipe('SelectedChange'));
   protected hovered$ = createValueState<boolean>(false, this.entityPipe('HoveredChange'));
-  protected painted$ = createValueState<boolean>(false, this.entityPipe('PaintedChange'));
+  protected painted$ = createValueState<PaintedEvent>(new PaintedEvent(this, false), this.entityPipe('PaintedChange'));
 
   constructor(type?: string, id?: string, logPrefix = '[Base]') {
     super(id, logPrefix);
@@ -35,16 +35,16 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
     return this.parent$.select((p) => new ParentChangeEvent(this, p));
   }
 
-  getPainted(): boolean {
+  getPainted(): PaintedEvent {
     return this.painted$.value;
   }
 
   setPainted(painted = true): void {
-    this.painted$.set(painted).emit();
+    this.painted$.set(new PaintedEvent(this, painted)).emit();
   }
 
   paintChanges(): Observable<PaintedEvent> {
-    return this.painted$.select((p) => new PaintedEvent(this, p));
+    return this.painted$.value$;
   }
 
   getHovered(): boolean {
