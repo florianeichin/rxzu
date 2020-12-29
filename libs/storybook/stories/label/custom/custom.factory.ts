@@ -3,13 +3,13 @@ import { AbstractAngularFactory, DefaultLabelModel } from '@ngx-diagrams/core';
 import { CustomLabelComponent } from './custom-label.component';
 
 export class CustomLabelFactory extends AbstractAngularFactory<CustomLabelComponent> {
-  constructor(private resolver: ComponentFactoryResolver, private renderer: Renderer2) {
+  constructor(protected resolver: ComponentFactoryResolver, protected renderer: Renderer2) {
     super('custom-label');
   }
 
   generateWidget({
-    host,
-    model
+    model,
+    host
   }: {
     model: DefaultLabelModel;
     host: ViewContainerRef;
@@ -35,6 +35,7 @@ export class CustomLabelFactory extends AbstractAngularFactory<CustomLabelCompon
       componentRef.instance[key] = value;
     });
 
+    componentRef.instance.ngOnInit();
     return componentRef;
   }
 

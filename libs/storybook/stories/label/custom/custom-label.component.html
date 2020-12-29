@@ -1,5 +1,4 @@
 <div
-  class="default-label"
   [ngStyle]="{
     transform:
       'translate(' +
@@ -12,5 +11,7 @@
       'deg)'
   }"
 >
-  {{ selectLabel() | async }}
+  <span class="default-label">
+    {{ selectLabel() | async }}
+  </span>
 </div>

@@ -1,5 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { DefaultLabelModel } from '@ngx-diagrams/core';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'ngdx-default-label',
@@ -8,11 +9,17 @@ import { DefaultLabelModel } from '@ngx-diagrams/core';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DefaultLabelComponent extends DefaultLabelModel implements OnInit {
-  constructor() {
+  constructor(private cdRef: ChangeDetectorRef) {
     super('ngdx-default-label');
   }
 
   ngOnInit() {
+    this.selectCoords()
+      .pipe(takeUntil(this.destroyed$))
+      .subscribe(() => {
+        this.cdRef.detectChanges();
+      });
+
     this.setPainted(true);
   }
 }
