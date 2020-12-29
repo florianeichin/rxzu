@@ -92,6 +92,6 @@ export class BaseEntity {
   }
 
   onEntityDestroy(): Observable<BaseEvent<BaseEntity>> {
-    return this.destroyed$.pipe(map((opts) => new BaseEvent(this, opts)));
+    return this.destroyed$.pipe(map(() => new BaseEvent(this)));
   }
 }

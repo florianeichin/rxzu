@@ -58,6 +58,7 @@ export class LinkModel extends BaseModel<DiagramModel> {
   }
 
   destroy() {
+    this.resetLabel();
     if (this.sourcePort) {
       this.sourcePort.removeLink(this);
     }
@@ -193,9 +194,8 @@ export class LinkModel extends BaseModel<DiagramModel> {
     if (currentLabel) {
       currentLabel.setParent(null);
       currentLabel.setPainted(false);
+      currentLabel.destroy();
     }
-
-    this.setLabel(null);
   }
 
   removePoint(pointModel: PointModel) {

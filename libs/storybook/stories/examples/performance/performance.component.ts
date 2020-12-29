@@ -1,6 +1,6 @@
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { DiagramEngine } from '@ngx-diagrams/angular';
-import { DiagramModel, SerializedDiagramModel, DefaultNodeModel } from '@ngx-diagrams/core';
+import { DiagramModel, DefaultNodeModel, DefaultLabelModel } from '@ngx-diagrams/core';
 
 @Component({
   selector: 'app-root',
@@ -18,33 +18,24 @@ export class PerformanceExampleStoryComponent implements OnInit {
   diagramModel: DiagramModel;
   initialRenderTimer: number;
   isResseted = false;
-  isCreated = true;
   numberOfNodes = 200;
-
-  @Output() serialized: EventEmitter<SerializedDiagramModel> = new EventEmitter();
 
   constructor(private diagramEngine: DiagramEngine) {}
 
   ngOnInit() {
     this.diagramEngine.registerDefaultFactories();
-    this.diagramModel = this.diagramEngine.createDiagram();
-
-    this.createNodes();
-
-    this.diagramEngine.zoomToFit();
+    this.diagramModel = this.diagramEngine.createModel();
+    this.createDiagram();
   }
 
   createDiagram() {
     this.createNodes();
+    this.diagramEngine.zoomToFit();
   }
 
   resetDiagram() {
     this.diagramModel.reset();
     this.isResseted = true;
-  }
-
-  recreateDiagram() {
-    this.createNodes();
   }
 
   createNodes() {
@@ -61,12 +52,14 @@ export class PerformanceExampleStoryComponent implements OnInit {
       nodeLoop.addInPort({ name: `inport${index}`, id: `inport${index}` });
       const outport = nodeLoop.addOutPort({ name: `outport${index}`, id: `outport${index}` });
 
+      this.diagramModel.addNode(nodeLoop);
+
       if (index > 0) {
         const link = outport.link(this.diagramModel.getNode(`${index - 1}`).getPort(`inport${index - 1}`));
+        const label = new DefaultLabelModel('label');
+        link.setLabel(label);
         this.diagramModel.addLink(link);
       }
-
-      this.diagramModel.addNode(nodeLoop);
     }
 
     const endTime = performance.now();

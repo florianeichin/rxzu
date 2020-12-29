@@ -29,7 +29,7 @@ export class CustomNodeDiagramComponent implements OnInit, OnChanges {
       .getFactoriesManager()
       .registerFactory({ type: 'nodeFactories', factory: new CustomNodeFactory(this.resolver, this.renderer) });
 
-    this.diagramModel = this.diagramEngine.createDiagram();
+    this.diagramModel = this.diagramEngine.createModel();
 
     const node1 = new DefaultNodeModel({ type: 'custom-node' });
     node1.setCoords({ x: 500, y: 300 });

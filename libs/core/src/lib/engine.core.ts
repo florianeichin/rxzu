@@ -24,7 +24,7 @@ export class DiagramEngineCore {
     this.factoriesManager = new FactoriesManager();
   }
 
-  createDiagram() {
+  createModel() {
     if (this.diagramModel) {
       throw new Error('diagram model already exists, please reset model prior to creating new diagram');
     }

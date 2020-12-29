@@ -24,7 +24,7 @@ export class CustomLabelDiagramComponent implements OnInit {
       .getFactoriesManager()
       .registerFactory({ type: 'labelFactories', factory: new CustomLabelFactory(this.resolver, this.renderer) });
 
-    this.diagramModel = this.diagramEngine.createDiagram();
+    this.diagramModel = this.diagramEngine.createModel();
 
     const node1 = new DefaultNodeModel();
     node1.setCoords({ x: 500, y: 300 });

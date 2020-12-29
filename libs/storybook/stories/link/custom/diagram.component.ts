@@ -29,7 +29,7 @@ export class CustomLinkDiagramComponent implements OnInit {
       .getFactoriesManager()
       .registerFactory({ type: 'linkFactories', factory: new CustomLinkFactory(this.resolver, this.renderer) });
 
-    this.diagramModel = this.diagramEngine.createDiagram();
+    this.diagramModel = this.diagramEngine.createModel();
 
     const node1 = new DefaultNodeModel();
     node1.setCoords({ x: 500, y: 300 });

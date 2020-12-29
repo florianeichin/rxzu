@@ -16,7 +16,7 @@ export class BasicExampleStoryComponent implements OnInit {
     const nodesDefaultDimensions = { height: 200, width: 200 };
     this.diagramEngine.registerDefaultFactories();
 
-    this.diagramModel = this.diagramEngine.createDiagram();
+    this.diagramModel = this.diagramEngine.createModel();
 
     const node1 = new DefaultNodeModel();
     node1.setCoords({ x: 500, y: 300 });
