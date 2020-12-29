@@ -6,7 +6,7 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { DefaultLinkModel, generateCurvePath, Coords } from '@ngx-diagrams/core';
+import { DefaultLinkModel, generateCurvePath } from '@ngx-diagrams/core';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
@@ -32,6 +32,10 @@ export class CustomLinkComponent extends DefaultLinkModel implements AfterViewIn
     super({ type: 'custom-link', logPrefix: '[CustomLink]' });
   }
 
+  ngOnInit() {
+    this.setPainted(true);
+  }
+
   ngAfterViewInit() {
     const firstPCoords$ = this.getFirstPoint().selectCoords();
     const lastPCoords$ = this.getLastPoint().selectCoords();
@@ -52,12 +56,6 @@ export class CustomLinkComponent extends DefaultLinkModel implements AfterViewIn
       const path = generateCurvePath(firstPCoords, lastPCoords, isStraight ? 0 : 200);
       this._path$.next(path);
     });
-  }
-
-  calcCenterOfPath(): Coords {
-    const firstPointCoords = this.getFirstPoint().getCoords();
-    const lastPointCoords = this.getLastPoint().getCoords();
-    return { x: (firstPointCoords.x + lastPointCoords.x) / 2, y: (firstPointCoords.y + lastPointCoords.y) / 2 };
   }
 
   deleteLink() {

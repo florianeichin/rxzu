@@ -45,6 +45,7 @@ export class CustomNodeFactory extends AbstractAngularFactory<DefaultNodeModel> 
       componentRef.instance[key] = value;
     });
 
+    componentRef.instance.ngOnInit();
     return componentRef;
   }
 

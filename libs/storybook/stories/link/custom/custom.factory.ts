@@ -36,6 +36,7 @@ export class CustomLinkFactory extends AbstractAngularFactory<CustomLinkComponen
       componentRef.instance[key] = value;
     });
 
+    componentRef.instance.ngOnInit();
     return componentRef;
   }
 
