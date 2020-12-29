@@ -6,9 +6,9 @@ import {
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
-import { DefaultLinkModel, generateCurvePath } from '@ngx-diagrams/core';
-import { BehaviorSubject, combineLatest } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Coords, createValueState, DefaultLinkModel, generateCurvePath, PointModel } from '@ngx-diagrams/core';
+import { combineLatest, Observable } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'custom-link',
@@ -20,16 +20,15 @@ export class CustomLinkComponent extends DefaultLinkModel implements AfterViewIn
   @ViewChild('labelLayer', { read: ViewContainerRef, static: true })
   labelLayer: ViewContainerRef;
 
-  _path$: BehaviorSubject<string> = new BehaviorSubject('');
-  path$ = this._path$.pipe(
-    this.entityPipe('path'),
-    tap(() => this.cd.detectChanges())
-  );
+  path$ = createValueState<string>(null, this.entityPipe('path'));
+  points$ = createValueState<PointModel[]>([], this.entityPipe('points'));
 
-  hover = false;
-
-  constructor(private cd: ChangeDetectorRef) {
+  constructor(private cdRef: ChangeDetectorRef) {
     super({ type: 'custom-link', logPrefix: '[CustomLink]' });
+  }
+
+  trackByPoints(i: number, point: PointModel) {
+    return point.id;
   }
 
   ngOnInit() {
@@ -40,22 +39,63 @@ export class CustomLinkComponent extends DefaultLinkModel implements AfterViewIn
     const firstPCoords$ = this.getFirstPoint().selectCoords();
     const lastPCoords$ = this.getLastPoint().selectCoords();
 
-    combineLatest([firstPCoords$, lastPCoords$]).subscribe(([firstPCoords, lastPCoords]) => {
-      const points = [firstPCoords, lastPCoords];
+    // Observe link coords and update drawing accordingly
+    combineLatest([firstPCoords$, lastPCoords$])
+      .pipe(takeUntil(this.onEntityDestroy()))
+      .subscribe(([firstPCoords, lastPCoords]) => {
+        const points = [firstPCoords, lastPCoords];
 
-      const isHorizontal = Math.abs(firstPCoords.x - lastPCoords.x) > Math.abs(firstPCoords.y - lastPCoords.y);
-      const xOrY = isHorizontal ? 'x' : 'y';
+        // handle regular links
+        // draw the smoothing
+        // if the points are too close, just draw a straight line
+        const isHorizontal = Math.abs(firstPCoords.x - lastPCoords.x) > Math.abs(firstPCoords.y - lastPCoords.y);
+        const xOrY = isHorizontal ? 'x' : 'y';
+        let isStraight = false;
+        if (Math.abs(points[0][xOrY] - points[1][xOrY]) < 50) {
+          isStraight = true;
+        }
 
-      // draw the smoothing
-      // if the points are too close, just draw a straight line
-      let isStraight = false;
-      if (Math.abs(points[0][xOrY] - points[1][xOrY]) < 150) {
-        isStraight = true;
-      }
+        const path = generateCurvePath(firstPCoords, lastPCoords, isStraight ? 0 : this.curvyness);
+        this.path$.set(path).emit();
 
-      const path = generateCurvePath(firstPCoords, lastPCoords, isStraight ? 0 : 200);
-      this._path$.next(path);
-    });
+        const label = this.getLabel();
+
+        // update label position
+        if (label) {
+          label.setCoords(this.calcCenterOfPath());
+        }
+
+        this.cdRef.detectChanges();
+      });
+
+    this.setPainted(true);
+  }
+
+  calcLabelIncline(firstPoint: Coords, secondPoint: Coords): number {
+    const dy = secondPoint.y - firstPoint.y;
+    const dx = secondPoint.x - firstPoint.x;
+
+    if (dx === 0) {
+      return 0;
+    }
+
+    let inclineAngel = (Math.atan(dy / dx) * 180) / Math.PI;
+
+    if (inclineAngel < 0) {
+      inclineAngel += 180;
+    }
+
+    return inclineAngel;
+  }
+
+  calcCenterOfPath(): Coords {
+    const firstPointCoords = this.getFirstPoint().getCoords();
+    const lastPointCoords = this.getLastPoint().getCoords();
+    return { x: (firstPointCoords.x + lastPointCoords.x) / 2, y: (firstPointCoords.y + lastPointCoords.y) / 2 };
+  }
+
+  selectPath(): Observable<string> {
+    return this.path$.value$;
   }
 
   deleteLink() {
