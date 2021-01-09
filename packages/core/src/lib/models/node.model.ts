@@ -10,7 +10,7 @@ import { BaseModel } from './base.model';
 import { DiagramModel } from './diagram.model';
 import { PortModel } from './port.model';
 
-export class NodeModel<P extends PortModel = PortModel> extends BaseModel<
+export class NodeModel<P extends PortModel> extends BaseModel<
   DiagramModel
 > {
   protected extras$ = createValueState<any>({}, this.entityPipe('extras'));

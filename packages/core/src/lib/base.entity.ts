@@ -8,7 +8,7 @@ import {
   log as _log,
   LOG_LEVEL,
   UID,
-  withLog as _withLog
+  withLog as _withLog,
 } from './utils/tool-kit.util';
 import { HashMap } from './utils/types';
 
@@ -44,7 +44,11 @@ export class BaseEntity {
   }
 
   entityPipe<T>(logMessage = ''): MonoTypeOperatorFunction<T> {
-    return _entityProperty<T>(this.onEntityDestroy(), 0, `${this._logPrefix}: ${logMessage}`);
+    return _entityProperty<T>(
+      this.onEntityDestroy(),
+      0,
+      `${this._logPrefix}: ${logMessage}`
+    );
   }
 
   getLocked(): boolean {
@@ -77,7 +81,7 @@ export class BaseEntity {
   serialize() {
     return {
       id: this.id,
-      locked: this.getLocked()
+      locked: this.getLocked(),
     };
   }
 

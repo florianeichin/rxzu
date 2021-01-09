@@ -97,7 +97,7 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
     );
   }
 
-  getSelectedEntities(): BaseModel[] {
+  getSelectedEntities() {
     return this.getSelected() ? [this] : [];
   }
 }

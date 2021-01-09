@@ -91,7 +91,7 @@ export class LinkModel extends BaseModel<DiagramModel> {
     super.destroy();
   }
 
-  doClone(lookupTable = {}, clone) {
+  doClone(lookupTable = {}, clone: any) {
     clone.setPoints(
       this.getPoints().map((point: PointModel) => {
         return point.clone(lookupTable);

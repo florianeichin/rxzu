@@ -18,7 +18,12 @@
       "@rxzu/core": ["packages/core/src/index.ts"],
       "@rxzu/angular": ["packages/angular/src/index.ts"]
     },
-    "noUnusedLocals": true
+    "noUnusedLocals": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "strictBindCallApply": true,
+    "strictFunctionTypes": true,
+    "noStrictGenericChecks": true
   },
   "exclude": ["node_modules", "tmp"]
 }

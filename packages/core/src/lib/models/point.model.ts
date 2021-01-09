@@ -8,7 +8,12 @@ import { LinkModel } from './link.model';
 export class PointModel extends BaseModel<LinkModel> {
   protected coords$: ValueState<Coords>;
 
-  constructor(link: LinkModel, coords: Coords, id?: string, logPrefix = '[Point]') {
+  constructor(
+    link: LinkModel,
+    coords: Coords,
+    id?: string,
+    logPrefix = '[Point]'
+  ) {
     super(link.getType(), id, logPrefix);
     this.coords$ = createValueState(coords, this.entityPipe('coords'));
     this.setParent(link);
@@ -17,7 +22,7 @@ export class PointModel extends BaseModel<LinkModel> {
   serialize(): SerializedPointModel {
     return {
       ...super.serialize(),
-      coords: this.getCoords()
+      coords: this.getCoords(),
     };
   }
 

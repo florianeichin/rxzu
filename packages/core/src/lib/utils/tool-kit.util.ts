@@ -3,13 +3,18 @@
  * Utility pathing and routing service
  */
 import { MonoTypeOperatorFunction, Observable } from 'rxjs';
-import { distinctUntilChanged, shareReplay, takeUntil, tap } from 'rxjs/operators';
+import {
+  distinctUntilChanged,
+  shareReplay,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { Coords } from '../interfaces/coords.interface';
 import { Entries, HashMap } from './types';
 
 export enum LOG_LEVEL {
   'LOG',
-  'ERROR'
+  'ERROR',
 }
 
 // @internal
@@ -32,7 +37,11 @@ export function isDev(): boolean {
 }
 
 // @internal
-export function log(message: string, level: LOG_LEVEL = LOG_LEVEL.LOG, ...args: any[]): void {
+export function log(
+  message: string,
+  level: LOG_LEVEL = LOG_LEVEL.LOG,
+  ...args: any[]
+): void {
   if (isDev() && __LOG__ === level) {
     if (__LOG__ === LOG_LEVEL.ERROR) {
       console.error(message, ...args);
@@ -45,9 +54,15 @@ export function log(message: string, level: LOG_LEVEL = LOG_LEVEL.LOG, ...args: 
  * rxjs log operator
  * @internal
  */
-export function withLog(message: string, level: LOG_LEVEL = LOG_LEVEL.LOG, ...args: any) {
+export function withLog(
+  message: string,
+  level: LOG_LEVEL = LOG_LEVEL.LOG,
+  ...args: any
+) {
   return <T>(source: Observable<T>) =>
-    isDev() ? source.pipe(tap((val) => log(message, level, val, ...args))) : source;
+    isDev()
+      ? source.pipe(tap((val) => log(message, level, val, ...args)))
+      : source;
 }
 
 /**
@@ -61,7 +76,9 @@ export function entityProperty<T>(
 ): MonoTypeOperatorFunction<T> {
   return <T>(source: Observable<T>): Observable<T> =>
     source.pipe(
-      distinctUntilChanged((a, b) => (a instanceof Map || b instanceof Map ? false : a === b)),
+      distinctUntilChanged((a, b) =>
+        a instanceof Map || b instanceof Map ? false : a === b
+      ),
       shareReplay(replayBy),
       withLog(logMessage),
       takeUntil(destroyedNotifier)
@@ -121,9 +138,13 @@ export function mapToArray<T>(map: HashMap<T>): T[] {
 }
 
 export function mapToEntries<T>(map: HashMap<T>): Entries<T> {
-  const result = [];
+  const result: [string, T][] = [];
+
   for (const key in map) {
-    result.push([key, map[key]]);
+    if (Object.prototype.hasOwnProperty.call(map, key)) {
+      const element = map[key];
+      result.push([key, element]);
+    }
   }
 
   return result;
@@ -134,7 +155,7 @@ export function unique<T>(arr: T[]): T[] {
 }
 
 export function arrayToMap<T>(arr: Array<{ id: ID } & T>): HashMap<T> {
-  const result = {};
+  const result: { [i: string]: any } = {};
   for (const val of arr) {
     if (!isNil(val)) {
       result[val.id] = val;
@@ -148,11 +169,20 @@ export function generateLinePath(firstPoint: any, lastPoint: any): string {
   return `M${firstPoint.x$},${firstPoint.y} L ${lastPoint.x$},${lastPoint.y}`;
 }
 
-export function generateCurvePath(firstPoint: Coords, lastPoint: Coords, curvy = 0): string {
-  const isHorizontal = Math.abs(firstPoint.x - lastPoint.x) > Math.abs(firstPoint.y - lastPoint.y);
+export function generateCurvePath(
+  firstPoint: Coords,
+  lastPoint: Coords,
+  curvy = 0
+): string {
+  const isHorizontal =
+    Math.abs(firstPoint.x - lastPoint.x) > Math.abs(firstPoint.y - lastPoint.y);
   const curvyX = isHorizontal ? curvy : 0;
   const curvyY = isHorizontal ? 0 : curvy;
 
-  return `M${firstPoint.x},${firstPoint.y} C ${firstPoint.x + curvyX},${firstPoint.y + curvyY}
-    ${lastPoint.x - curvyX},${lastPoint.y - curvyY} ${lastPoint.x},${lastPoint.y}`;
+  return `M${firstPoint.x},${firstPoint.y} C ${firstPoint.x + curvyX},${
+    firstPoint.y + curvyY
+  }
+    ${lastPoint.x - curvyX},${lastPoint.y - curvyY} ${lastPoint.x},${
+    lastPoint.y
+  }`;
 }

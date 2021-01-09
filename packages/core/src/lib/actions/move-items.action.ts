@@ -9,7 +9,11 @@ export class MoveItemsAction extends BaseAction {
   selectionModels: SelectionModel[];
   moved: boolean;
 
-  constructor(mouseX: number, mouseY: number, diagramEngine: DiagramEngineCore) {
+  constructor(
+    mouseX: number,
+    mouseY: number,
+    diagramEngine: DiagramEngineCore
+  ) {
     super(mouseX, mouseY);
     this.moved = false;
     let selectedItems = diagramEngine.getDiagramModel().getSelectedItems();
@@ -24,7 +28,7 @@ export class MoveItemsAction extends BaseAction {
       return {
         model: item,
         initialX,
-        initialY
+        initialY,
       };
     });
   }
