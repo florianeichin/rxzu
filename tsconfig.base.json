@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@rxzu/core": ["packages/core/src/index.ts"],
-      "@rxzu/angular": ["packages/angular/src/index.ts"]
+      "@rxzu/angular": ["packages/angular/src/index.ts"],
+      "@rxzu/react": ["packages/react/src/index.ts"]
     },
     "noUnusedLocals": true
   },

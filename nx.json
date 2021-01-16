@@ -36,6 +36,9 @@
     "rxzu-angular-e2e": {
       "tags": [],
       "implicitDependencies": ["core", "angular"]
+    },
+    "react": {
+      "tags": []
     }
   },
   "workspaceLayout": {

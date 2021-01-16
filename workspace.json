@@ -9,12 +9,16 @@
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": ["packages/core/**/*.ts"]
+            "lintFilePatterns": [
+              "packages/core/**/*.ts"
+            ]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/packages/core"],
+          "outputs": [
+            "coverage/packages/core"
+          ],
           "options": {
             "jestConfig": "packages/core/jest.config.js",
             "passWithNoTests": true
@@ -22,13 +26,17 @@
         },
         "build": {
           "executor": "@nrwl/node:package",
-          "outputs": ["{options.outputPath}"],
+          "outputs": [
+            "{options.outputPath}"
+          ],
           "options": {
             "outputPath": "dist/packages/core",
             "tsConfig": "packages/core/tsconfig.lib.json",
             "packageJson": "packages/core/package.json",
             "main": "packages/core/src/index.ts",
-            "assets": ["packages/core/*.md"]
+            "assets": [
+              "packages/core/*.md"
+            ]
           }
         }
       }
@@ -38,7 +46,7 @@
       "root": "packages/angular",
       "sourceRoot": "packages/angular/src",
       "prefix": "rxzu",
-      "architect": {
+      "targets": {
         "build": {
           "executor": "@nrwl/angular:package",
           "options": {
@@ -58,12 +66,17 @@
               "packages/angular/tsconfig.lib.json",
               "packages/angular/tsconfig.spec.json"
             ],
-            "exclude": ["**/node_modules/**", "!packages/angular/**/*"]
+            "exclude": [
+              "**/node_modules/**",
+              "!packages/angular/**/*"
+            ]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/packages/angular"],
+          "outputs": [
+            "coverage/packages/angular"
+          ],
           "options": {
             "jestConfig": "packages/angular/jest.config.js",
             "passWithNoTests": true
@@ -76,9 +89,9 @@
       "root": "packages/storybook",
       "sourceRoot": "packages/storybook",
       "prefix": "sharedstorybook",
-      "architect": {
+      "targets": {
         "storybook": {
-          "builder": "@nrwl/storybook:storybook",
+          "executor": "@nrwl/storybook:storybook",
           "options": {
             "uiFramework": "@storybook/angular",
             "port": 4400,
@@ -93,7 +106,7 @@
           }
         },
         "build": {
-          "builder": "@nrwl/storybook:build",
+          "executor": "@nrwl/storybook:build",
           "options": {
             "uiFramework": "@storybook/angular",
             "outputPath": "dist/storybook/shared-storybook",
@@ -108,7 +121,7 @@
           }
         }
       },
-      "schematics": {
+      "generators": {
         "@nrwl/angular:component": {
           "style": "scss"
         }
@@ -118,9 +131,9 @@
       "root": "apps/rxzu-angular-e2e",
       "sourceRoot": "apps/rxzu-angular-e2e/src",
       "projectType": "application",
-      "architect": {
+      "targets": {
         "e2e": {
-          "builder": "@nrwl/cypress:cypress",
+          "executor": "@nrwl/cypress:cypress",
           "options": {
             "cypressConfig": "apps/rxzu-angular-e2e/cypress.json",
             "tsConfig": "apps/rxzu-angular-e2e/tsconfig.e2e.json",
@@ -133,10 +146,67 @@
           }
         },
         "lint": {
-          "builder": "@nrwl/linter:lint",
+          "executor": "@nrwl/linter:lint",
           "options": {
-            "tsConfig": ["apps/rxzu-angular-e2e/tsconfig.e2e.json"],
-            "exclude": ["**/node_modules/**", "!apps/rxzu-angular-e2e/**"]
+            "tsConfig": [
+              "apps/rxzu-angular-e2e/tsconfig.e2e.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!apps/rxzu-angular-e2e/**"
+            ]
+          }
+        }
+      }
+    },
+    "react": {
+      "root": "packages/react",
+      "sourceRoot": "packages/react/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "packages/react/**/*.{ts,tsx,js,jsx}"
+            ]
+          }
+        },
+        "build": {
+          "executor": "@nrwl/web:package",
+          "outputs": [
+            "{options.outputPath}"
+          ],
+          "options": {
+            "outputPath": "dist/packages/react",
+            "tsConfig": "packages/react/tsconfig.lib.json",
+            "project": "packages/react/package.json",
+            "entryFile": "packages/react/src/index.ts",
+            "external": [
+              "react",
+              "react-dom",
+              "react-is",
+              "styled-components"
+            ],
+            "babelConfig": "@nrwl/react/plugins/bundle-babel",
+            "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
+            "assets": [
+              {
+                "glob": "README.md",
+                "input": ".",
+                "output": "."
+              }
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/packages/react"
+          ],
+          "options": {
+            "jestConfig": "packages/react/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }

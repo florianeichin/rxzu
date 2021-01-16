@@ -1,0 +1,27 @@
+{
+  "name": "@rxzu/react",
+  "version": "0.0.1",
+  "license": "MIT",
+  "dependencies": {
+    "@rxzu/core": "latest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vonage/rxzu",
+    "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "web",
+    "diagram",
+    "diagrams",
+    "typescript",
+    "flowchart",
+    "graph",
+    "react"
+  ],
+  "description": "RxZu React Wrapper",
+  "homepage": "https://vonage.github.io/rxzu"
+}
