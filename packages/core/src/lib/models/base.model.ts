@@ -8,7 +8,7 @@ import {
 import { createValueState } from '../state';
 
 export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
-  protected readonly _type: string;
+  protected readonly type: string;
 
   protected parent$ = createValueState<E>(
     null,
@@ -29,7 +29,7 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
 
   constructor(type?: string, id?: string, logPrefix = '[Base]') {
     super(id, logPrefix);
-    this._type = type;
+    this.type = type;
   }
 
   serialize() {
@@ -76,7 +76,7 @@ export class BaseModel<E extends BaseEntity = BaseEntity> extends BaseEntity {
   }
 
   getType(): string {
-    return this._type;
+    return this.type;
   }
 
   getSelected(): boolean {

@@ -157,10 +157,10 @@ export class RxZuDiagramComponent
   }
 
   protected getNodesLayer(): HTMLDivElement {
-    return this.host.querySelector('.ngdx-nodes-layer');
+    return this.host.querySelector('.nodes-layer');
   }
 
   protected getLinksLayer(): HTMLDivElement {
-    return this.host.querySelector('.ngdx-links-layer');
+    return this.host.querySelector('.links-layer');
   }
 }
