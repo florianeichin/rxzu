@@ -1,1 +1,1 @@
-Shared Storybook
+Angular Storybook

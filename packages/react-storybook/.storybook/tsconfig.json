@@ -9,7 +9,7 @@
     "../../**/*.spec.ts",
   ],
   "include": [
-    "../../packages/angular-storybook/**/*",
+    "../../packages/react-storybook/**/*",
   ],
   "files": [
     "./typings.d.ts"

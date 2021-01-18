@@ -38,6 +38,7 @@
     "snyk-protect": "snyk protect",
     "prepare": "npm run snyk-protect",
     "storybook:angular": "yarn docs:json && nx run angular-storybook:storybook",
+    "storybook:react": "nx run react-storybook:storybook",
     "docs:json": "compodoc -p ./packages/angular/tsconfig.lib.prod.json -e json -d ./packages/angular-storybook",
     "run-many": "yarn docs:json && npx nx run-many --target=build --configuration=production --all"
   },
@@ -89,14 +90,17 @@
     "@semantic-release/npm": "^7.0.8",
     "@storybook/addon-docs": "^6.1.11",
     "@storybook/addon-essentials": "^6.1.11",
+    "@storybook/addon-knobs": "^6.1.11",
     "@storybook/addon-links": "^6.1.11",
     "@storybook/angular": "^6.1.11",
     "@storybook/react": "^6.1.14",
+    "@svgr/webpack": "^5.4.0",
     "@types/dagre": "^0.7.44",
     "@types/jest": "26.0.8",
     "@types/node": "12.12.38",
     "@types/react-is": "16.7.1",
     "@types/styled-components": "5.1.4",
+    "@types/webpack": "4.41.21",
     "@typescript-eslint/eslint-plugin": "4.3.0",
     "@typescript-eslint/parser": "4.3.0",
     "babel-jest": "26.2.2",
@@ -120,7 +124,8 @@
     "ts-jest": "26.4.0",
     "ts-node": "~9.1.1",
     "tslint": "~6.1.0",
-    "typescript": "~4.0.3"
+    "typescript": "~4.0.3",
+    "url-loader": "^3.0.0"
   },
   "config": {
     "commitizen": {

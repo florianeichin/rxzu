@@ -9,16 +9,12 @@
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": [
-              "packages/core/**/*.ts"
-            ]
+            "lintFilePatterns": ["packages/core/**/*.ts"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/packages/core"
-          ],
+          "outputs": ["coverage/packages/core"],
           "options": {
             "jestConfig": "packages/core/jest.config.js",
             "passWithNoTests": true
@@ -26,17 +22,13 @@
         },
         "build": {
           "executor": "@nrwl/node:package",
-          "outputs": [
-            "{options.outputPath}"
-          ],
+          "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/packages/core",
             "tsConfig": "packages/core/tsconfig.lib.json",
             "packageJson": "packages/core/package.json",
             "main": "packages/core/src/index.ts",
-            "assets": [
-              "packages/core/*.md"
-            ]
+            "assets": ["packages/core/*.md"]
           }
         }
       }
@@ -66,17 +58,12 @@
               "packages/angular/tsconfig.lib.json",
               "packages/angular/tsconfig.spec.json"
             ],
-            "exclude": [
-              "**/node_modules/**",
-              "!packages/angular/**/*"
-            ]
+            "exclude": ["**/node_modules/**", "!packages/angular/**/*"]
           }
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/packages/angular"
-          ],
+          "outputs": ["coverage/packages/angular"],
           "options": {
             "jestConfig": "packages/angular/jest.config.js",
             "passWithNoTests": true
@@ -88,8 +75,8 @@
       "projectType": "library",
       "root": "packages/angular-storybook",
       "sourceRoot": "packages/angular-storybook",
-      "prefix": "angularstoryboo",
-      "targets": {
+      "prefix": "angularstorybook",
+      "architect": {
         "storybook": {
           "executor": "@nrwl/storybook:storybook",
           "options": {
@@ -148,13 +135,8 @@
         "lint": {
           "executor": "@nrwl/linter:lint",
           "options": {
-            "tsConfig": [
-              "apps/angular-e2e/tsconfig.e2e.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!apps/angular-e2e/**"
-            ]
+            "tsConfig": ["apps/angular-e2e/tsconfig.e2e.json"],
+            "exclude": ["**/node_modules/**", "!apps/angular-e2e/**"]
           }
         }
       }
@@ -167,27 +149,18 @@
         "lint": {
           "executor": "@nrwl/linter:eslint",
           "options": {
-            "lintFilePatterns": [
-              "packages/react/**/*.{ts,tsx,js,jsx}"
-            ]
+            "lintFilePatterns": ["packages/react/**/*.{ts,tsx,js,jsx}"]
           }
         },
         "build": {
           "executor": "@nrwl/web:package",
-          "outputs": [
-            "{options.outputPath}"
-          ],
+          "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/packages/react",
             "tsConfig": "packages/react/tsconfig.lib.json",
             "project": "packages/react/package.json",
             "entryFile": "packages/react/src/index.ts",
-            "external": [
-              "react",
-              "react-dom",
-              "react-is",
-              "styled-components"
-            ],
+            "external": ["react", "react-dom", "react-is", "styled-components"],
             "babelConfig": "@nrwl/react/plugins/bundle-babel",
             "rollupConfig": "@nrwl/react/plugins/bundle-rollup",
             "assets": [
@@ -201,12 +174,73 @@
         },
         "test": {
           "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/packages/react"
-          ],
+          "outputs": ["coverage/packages/react"],
           "options": {
             "jestConfig": "packages/react/jest.config.js",
             "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "react-storybook": {
+      "projectType": "library",
+      "root": "packages/react-storybook",
+      "sourceRoot": "packages/react-storybook",
+      "targets": {
+        "storybook": {
+          "executor": "@nrwl/storybook:storybook",
+          "options": {
+            "uiFramework": "@storybook/react",
+            "port": 4400,
+            "config": {
+              "configFolder": "packages/react-storybook/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        },
+        "build-storybook": {
+          "executor": "@nrwl/storybook:build",
+          "options": {
+            "uiFramework": "@storybook/react",
+            "outputPath": "dist/storybook/react",
+            "config": {
+              "configFolder": "packages/react-storybook/.storybook"
+            }
+          },
+          "configurations": {
+            "ci": {
+              "quiet": true
+            }
+          }
+        }
+      }
+    },
+    "react-e2e": {
+      "root": "apps/react-e2e",
+      "sourceRoot": "apps/react-e2e/src",
+      "projectType": "application",
+      "targets": {
+        "e2e": {
+          "executor": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/react-e2e/cypress.json",
+            "tsConfig": "apps/react-e2e/tsconfig.e2e.json",
+            "devServerTarget": "react:storybook"
+          },
+          "configurations": {
+            "ci": {
+              "devServerTarget": "react:storybook:ci"
+            }
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": ["apps/react-e2e/**/*.{js,ts}"]
           }
         }
       }

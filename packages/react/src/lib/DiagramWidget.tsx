@@ -89,6 +89,7 @@ import { DiagramModel } from '@rxzu/core';
 import { useEffect, useState, useRef } from 'react';
 import * as React from 'react';
 import styled from 'styled-components';
+import { DiagramWidgetOptions } from './DiagramWidgetOptions';
 
 const S = {
   Diagram: styled.div`
@@ -143,18 +144,7 @@ const S = {
   `,
 };
 
-export interface DiagramWidgetOptions {
-  diagramModel: DiagramModel;
-  allowCanvasZoom: boolean;
-  allowCanvasTranslation: boolean;
-  inverseZoom: boolean;
-  allowLooseLinks: boolean;
-  maxZoomOut: number;
-  maxZoomIn: number;
-  portMagneticRadius: number;
-}
-
-export const DiagramWidget = (
+export const RxZuDiagramWidget = (
   model: DiagramModel,
   options?: DiagramWidgetOptions
 ) => {

@@ -2,7 +2,7 @@ import * as React from 'react';
 import styled from '@emotion/styled';
 import { Coords, DefaultLabelModel } from '@rxzu/core';
 
-export const S = {
+const S = {
   Label: styled.div<{ coords: Coords }>`
     transform: 'translate(${(p) => p.coords.x}px,  ${(p) => p.coords.y}px);
     position: absolute;
