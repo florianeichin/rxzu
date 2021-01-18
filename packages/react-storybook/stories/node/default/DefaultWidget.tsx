@@ -6,11 +6,13 @@ import {
 } from '@rxzu/react';
 
 export const DefaultNodeStory = () => {
-  const nodesDefaultDimensions = { height: 200, width: 200 };
-  const engine = new DiagramEngine();
+  const [nodesDefaultDimensions] = React.useState({ height: 200, width: 200 });
+  const [engine] = React.useState(new DiagramEngine());
   engine.registerDefaultFactories();
-  const model = engine.createModel();
-  const node1 = new DefaultNodeModel();
+
+  const [model] = React.useState(engine.createModel());
+  const [node1] = React.useState(new DefaultNodeModel());
+
   node1.setCoords({ x: 500, y: 300 });
   node1.setDimensions(nodesDefaultDimensions);
 

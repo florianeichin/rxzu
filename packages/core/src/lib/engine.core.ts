@@ -287,7 +287,7 @@ export class DiagramEngineCore {
   }
 
   paintNodes(
-    nodesHost,
+    nodesHost?,
     promise = false
   ): Observable<boolean> | Promise<boolean> {
     const observable = this.diagramModel.selectNodes().pipe(
@@ -340,7 +340,7 @@ export class DiagramEngineCore {
     return promise ? observable.toPromise() : observable;
   }
 
-  paintLinks(linksHost, promise = false): Observable<void> | Promise<void> {
+  paintLinks(linksHost?, promise = false): Observable<void> | Promise<void> {
     const observable = this.diagramModel.selectLinks().pipe(
       takeUntil(this.diagramModel.onEntityDestroy()),
       map((links) => {

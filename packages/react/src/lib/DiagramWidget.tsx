@@ -1,65 +1,4 @@
 /**
-export class RxZuDiagramComponent
-  implements AfterViewInit, OnDestroy, ZonedClass {
-  @Input('model') diagramModel: DiagramModel;
-  @Input() allowCanvasZoom = true;
-  @Input() allowCanvasTranslation = true;
-  @Input() inverseZoom = true;
-  @Input() allowLooseLinks = true;
-  @Input() maxZoomOut: number = null;
-  @Input() maxZoomIn: number = null;
-  @Input() portMagneticRadius = 30;
-
-  @ViewChild('nodesLayer', { read: ViewContainerRef })
-  nodesLayer: ViewContainerRef;
-
-  @ViewChild('linksLayer', { read: ViewContainerRef })
-  linksLayer: ViewContainerRef;
-
-  @ViewChild('canvas', { read: ElementRef })
-  canvas: ElementRef;
-
-  diagramEngine: DiagramEngineCore;
-  mouseManager: MouseManager;
-  protected destroyed$ = new ReplaySubject<boolean>(1);
-  protected selectionBox$: Observable<SelectingAction>;
-
-  get host(): HTMLElement {
-    return this.elRef.nativeElement;
-  }
-
-  constructor(
-    public ngZone: NgZone,
-    protected renderer: Renderer2,
-    protected cdRef: ChangeDetectorRef,
-    protected elRef: ElementRef<HTMLElement>
-  ) {}
-
-  ngAfterViewInit() {
-    if (this.diagramModel) {
-      this.diagramEngine = this.diagramModel.getDiagramEngine();
-      this.mouseManager = this.diagramEngine.getMouseManager();
-      this.diagramEngine.setCanvas(this.canvas.nativeElement);
-
-      this.diagramEngine.setup({
-        ...this,
-      });
-
-      (this.diagramEngine.paintNodes(this.nodesLayer) as Observable<boolean>)
-        .pipe(
-          switchMap(
-            () =>
-              this.diagramEngine.paintLinks(this.linksLayer) as Observable<void>
-          )
-        )
-        .subscribe(() => {
-          this.initSubs();
-          this.initSelectionBox();
-          this.cdRef.detectChanges();
-        });
-    }
-  }
-
   ngOnDestroy() {
     this.destroyed$.next(true);
     this.destroyed$.complete();
@@ -90,6 +29,8 @@ import { useEffect, useState, useRef } from 'react';
 import * as React from 'react';
 import styled from 'styled-components';
 import { DiagramWidgetOptions } from './DiagramWidgetOptions';
+import { Observable } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 
 const S = {
   Diagram: styled.div`
@@ -148,8 +89,20 @@ export const RxZuDiagramWidget = (
   model: DiagramModel,
   options?: DiagramWidgetOptions
 ) => {
-  const engine = useRef(model.getDiagramEngine());
-  const mouseManager = useRef(engine.current.getMouseManager());
+  console.log(options);
+  const canvas = useRef(null);
+  const engine = model.getDiagramEngine();
+  engine.setup(options);
+  engine.setCanvas(canvas.current);
+
+  const mouseManager = engine.getMouseManager();
+
+  (engine.paintNodes() as Observable<boolean>)
+    .pipe(switchMap(() => engine.paintLinks()))
+    .subscribe(() => {
+      console.log('PAINTING!');
+    });
+
   const [defaultOptions, setOptions] = useState({
     allowCanvasTranslation: true,
     allowCanvasZoom: true,
@@ -159,15 +112,16 @@ export const RxZuDiagramWidget = (
   });
 
   useEffect(() => {
-    setOptions(options);
-  }, [options]);
+    setOptions({ ...defaultOptions, ...options });
+  }, [options, defaultOptions]);
 
   return (
     <S.Diagram
-      onMouseDown={(e) => mouseManager.current.onMouseDown(e.nativeEvent)}
-      onMouseUp={(e) => mouseManager.current.onMouseUp(e.nativeEvent)}
-      onMouseMove={(e) => mouseManager.current.onMouseMove(e.nativeEvent)}
-      onWheel={(e) => mouseManager.current.onMouseWheel(e.nativeEvent)}
+      ref={canvas}
+      onMouseDown={(e) => mouseManager.onMouseDown(e.nativeEvent)}
+      onMouseUp={(e) => mouseManager.onMouseUp(e.nativeEvent)}
+      onMouseMove={(e) => mouseManager.onMouseMove(e.nativeEvent)}
+      onWheel={(e) => mouseManager.onMouseWheel(e.nativeEvent)}
     >
       <S.NodesLayer
         x={model.getOffsetX()}

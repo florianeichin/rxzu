@@ -1,4 +1,5 @@
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 /**
  * Export a function. Accept the base config as the only param.
@@ -26,6 +27,8 @@ module.exports = async ({ config, mode }) => {
     svgRuleIndex
   ].test = /\.(ico|jpg|jpeg|png|gif|eot|otf|webp|ttf|woff|woff2|cur|ani|pdf)(\?.*)?$/;
 
+  config.externals = [nodeExternals()];
+
   config.module.rules.push(
     {
       test: /\.(png|jpe?g|gif|webp)$/,
@@ -35,6 +38,7 @@ module.exports = async ({ config, mode }) => {
         name: '[name].[hash:7].[ext]',
       },
     },
+    { test: /[\/\\]@angular[\/\\].+\.js$/, parser: { system: true } },
     {
       test: /\.svg$/,
       oneOf: [
